@@ -98,7 +98,7 @@ make_class_priors <- function(priors, id, data) {
   class_proportions <- n_samples / samples_per_class
 
   if (is.numeric(priors)) {
-    stopifnot(length(priors) == n_classes, sum(priors) == 1)
+    stopifnot(length(priors) == n_classes, sum(priors) == 1, all(priors >= 0))
     return(priors)
   }
 
@@ -117,16 +117,8 @@ buildClanc <- function(data, id, cNames, train, active) {
   classNames = cNames
   prior = train$prior
 
-  if(is.numeric(prior)) {
-    if(length(prior) != p | sum(prior) != 1 | any(prior <= 0))
-      stop("Invalid prior.")
-    pi.k = prior
-  } else {
-    if(prior == "equal")
-      pi.k = rep(1 / p, p)
-    else if(prior == "class")
-      pi.k = nn / n
-  }
+
+  pi.k <- make_class_priors(priors = train$prior, id = id, data = data)
 
   ## select genes, update inactive centroid components
   selected = selectClanc(d.k = train$tStats, d.k.ord = list("d.k.rnks" = train$tStatsOrderIndices,
