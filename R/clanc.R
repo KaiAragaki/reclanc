@@ -40,7 +40,7 @@ cvClanc <- function(data, id, prior = "equal", active = 1:10) {
 
   ## cross validation
   cat("CV:")
-  for(i in 1:folds) {
+  for(i in seq_len(folds)) {
     cat(i)
 
     ## form initial statistics
@@ -90,7 +90,7 @@ cvClanc <- function(data, id, prior = "equal", active = 1:10) {
   }
 
   ## record numbers and proportions of errors
-  for(i in 1:p) {
+  for(i in seq_len(p)) {
     if(d > 1)
       cv.err.cnt.cls[, i] <- apply(cv.error[, , i], 1, sum)
     else
