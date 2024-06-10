@@ -7,11 +7,7 @@
 #'   proportions of each class in the training data will be used as the prior.
 #' @param active how many active features to consider? can either be a single
 #'   number or a vector containing a range of values to consider.
-#' @param gui indicates whether call is coming from gui. typical user should
-#'   leave default.
-#' @param printFrm frame in which to print if called from gui. typical user
-#'   should leave default.
-cvClanc <- function(data, id, prior = "equal", active = 1:10, gui = F, prntFrm = NULL) {
+cvClanc <- function(data, id, prior = "equal", active = 1:10) {
   cvIdx <- balancedFolds(id, 5)
   m <- nrow(data)
   n <- ncol(data)
@@ -36,15 +32,6 @@ cvClanc <- function(data, id, prior = "equal", active = 1:10, gui = F, prntFrm =
     d <- length(active)
   }
 
-  if(gui) {
-    printClanc <- function(msg) {
-      assign("shareMsg", msg, prntFrm)
-      eval(expression(postMsg(shareMsg)), prntFrm)
-    }
-  } else {
-    printClanc <- cat
-  }
-
   cv.error <- array(rep(0, d * folds * p), dim = c(d, folds, p))
 
   cv.err.cnt.cls <- matrix(NA, nrow = d, ncol = p)
@@ -56,9 +43,9 @@ cvClanc <- function(data, id, prior = "equal", active = 1:10, gui = F, prntFrm =
   dimnames(ID) <- list(NULL, names(nn))
 
   ## cross validation
-  printClanc("CV:")
+  cat("CV:")
   for(i in 1:folds) {
-    printClanc(i)
+    cat(i)
 
     ## form initial statistics
     v <- length(cvIdx[[i]])
@@ -117,7 +104,7 @@ cvClanc <- function(data, id, prior = "equal", active = 1:10, gui = F, prntFrm =
   cv.err.cnt.ttl <- apply(cv.err.cnt.cls, 1, sum)
   cv.err.prpn.ttl <- cv.err.cnt.ttl / n
 
-  printClanc("\n")
+  cat("\n")
   list("classErrors" = cv.err.prpn.cls, "overallErrors" = cv.err.prpn.ttl, "prior" = pi.k)
 }
 
