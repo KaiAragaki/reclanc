@@ -293,14 +293,7 @@ pooledSDClanc <- function(X, ID) {
   sqrt(drop(dif2 %*% rep(1 / (n - p), n)))
 }
 
-balancedFolds <- function(y, nfolds = 5) {
-  permuteRows = function(x) {
-    dd = dim(x)
-    n = dd[1]
-    p = dd[2]
-    mm = runif(length(x)) + rep(seq(n) * 10, rep(p, n))
-    matrix(t(x)[order(mm)], n, p, byrow = T)
-  }
+balancedFolds <- function(y, nfolds) {
 
   totals = table(y)
   fmax = max(totals)
@@ -311,7 +304,7 @@ balancedFolds <- function(y, nfolds = 5) {
   for(i in seq(totals))
     bigmat[seq(totals[i]), i] = sample(yids[[i]])
   smallmat = matrix(bigmat, nrow = nfolds)
-  smallmat = permuteRows(t(smallmat))
+  smallmat = permute_rows(t(smallmat))
   res = vector("list", nfolds)
   for(j in 1:nfolds) {
     jj = !is.na(smallmat[, j])
@@ -319,6 +312,10 @@ balancedFolds <- function(y, nfolds = 5) {
   }
 
   res
+}
+
+permute_rows <- function(x) {
+  t(apply(x, 1, sample))
 }
 
 distClanc <- function(data, cntrds, sd, prior) {
