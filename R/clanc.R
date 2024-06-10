@@ -7,24 +7,15 @@
 #'   proportions of each class in the training data will be used as the prior.
 #' @param active how many active features to consider? can either be a single
 #'   number or a vector containing a range of values to consider.
-cvClanc <- function(data, id, prior = "equal", active = 1:10) {
+cvClanc <- function(data, id, priors = "equal", active = 1:10) {
   cvIdx <- balancedFolds(id, 5)
-  m <- nrow(data)
+  nrow_data <- nrow(data)
   n <- ncol(data)
   p <- length(unique(id))
   nn <- as.numeric(table(id))
   folds <- length(cvIdx)
 
-  if (is.numeric(prior)) {
-    if (length(prior) != p | sum(prior) != 1)
-      stop ("Invalid prior.")
-    pi.k <- prior
-  } else {
-    if (prior == "equal")
-      pi.k <- rep(1 / p, p)
-    else if (prior == "class")
-      pi.k <- nn / n
-  }
+  class_priors <- make_class_priors(priors)
 
   d <- ifelse(is.matrix(active), nrow(active), length(active))
 
@@ -66,22 +57,18 @@ cvClanc <- function(data, id, prior = "equal", active = 1:10) {
     d.k.ord <- orderStatsClanc(d.k = d.k)
 
     ## select genes, update inactive centroid components
-    for(j in 1:d) {
-      if(is.matrix(active))
-        aa <- active[j, ]
-      else
-        aa <- active[j]
-
+    for(j in seq_len(d)) {
+      # FIXME
+      aa <- ifelse(is.matrix(active), active[j, ], active[j])
       selected <- selectClanc(d.k = d.k, d.k.ord = d.k.ord, active = aa)
-      active.idx <- (1:m)[drop(selected %*% rep(1, p)) != 0]
-
+      active.idx <- seq_len(nrow_data)[drop(selected %*% rep(1, p)) != 0]
       cntrds <- cntrd.k[active.idx, ]
-      for(k in 1:p)
+      for(k in seq_len(p))
         cntrds[selected[active.idx, k] == 0, k] = cntrd.o[active.idx][selected[active.idx, k] == 0]
 
       ## classify test sample and assess error status
-      for(k in 1:v) {
-        dd <- distClanc(data = Y[active.idx, k], cntrds = cntrds, sd = p.sd[active.idx], prior = pi.k)
+      for(k in seq_len(v)) {
+        dd <- distClanc(data = Y[active.idx, k], cntrds = cntrds, sd = p.sd[active.idx], prior = class_priors)
 
         if(match(min(dd), dd) != truth[k])
           cv.error[j, i, truth[k]] = cv.error[j, i, truth[k]] + 1
@@ -101,7 +88,23 @@ cvClanc <- function(data, id, prior = "equal", active = 1:10) {
   cv.err.prpn.ttl <- cv.err.cnt.ttl / n
 
   cat("\n")
-  list(classErrors = cv.err.prpn.cls, overallErrors = cv.err.prpn.ttl, prior = pi.k)
+  list(classErrors = cv.err.prpn.cls, overallErrors = cv.err.prpn.ttl, prior = class_priors)
+}
+
+make_class_priors <- function(priors, id, data) {
+  n_classes <- length(unique(id))
+  n_samples <- ncol(data)
+  samples_per_class <- as.numeric(table(id))
+  class_proportions <- n_samples / samples_per_class
+
+  if (is.numeric(priors)) {
+    stopifnot(length(priors) == n_classes, sum(priors) == 1)
+    return(priors)
+  }
+
+  stopifnot(prior %in% c("equal", "class"))
+  if (priors == "equal") return(rep(1 / n_classes, n_classes))
+  if (priors == "class") return(class_proportions)
 }
 
 buildClanc <- function(data, id, cNames, train, active) {
