@@ -105,7 +105,7 @@ cvClanc <- function(data, id, prior = "equal", active = 1:10) {
   cv.err.prpn.ttl <- cv.err.cnt.ttl / n
 
   cat("\n")
-  list("classErrors" = cv.err.prpn.cls, "overallErrors" = cv.err.prpn.ttl, "prior" = pi.k)
+  list(classErrors = cv.err.prpn.cls, overallErrors = cv.err.prpn.ttl, prior = pi.k)
 }
 
 buildClanc <- function(data, id, cNames, train, active) {
