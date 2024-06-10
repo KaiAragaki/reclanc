@@ -12,48 +12,48 @@
 #' @param printFrm frame in which to print if called from gui. typical user
 #'   should leave default.
 cvClanc <- function(data, id, prior = "equal", active = 1:10, gui = F, prntFrm = NULL) {
-  cvIdx = balancedFolds(id, 5)
-  m = nrow(data)
-  n = ncol(data)
-  p = length(unique(id))
-  nn = as.numeric(table(id))
-  folds = length(cvIdx)
+  cvIdx <- balancedFolds(id, 5)
+  m <- nrow(data)
+  n <- ncol(data)
+  p <- length(unique(id))
+  nn <- as.numeric(table(id))
+  folds <- length(cvIdx)
 
-  if(is.numeric(prior)) {
-    if(length(prior) != p | sum(prior) != 1)
-      stop("Invalid prior.")
-    pi.k = prior
+  if (is.numeric(prior)) {
+    if (length(prior) != p | sum(prior) != 1)
+      stop ("Invalid prior.")
+    pi.k <- prior
   } else {
-    if(prior == "equal")
-      pi.k = rep(1 / p, p)
-    else if(prior == "class")
-      pi.k = nn / n
+    if (prior == "equal")
+      pi.k <- rep(1 / p, p)
+    else if (prior == "class")
+      pi.k <- nn / n
   }
 
-  if(is.matrix(active)) {
-    d = nrow(active)
+  if (is.matrix(active)) {
+    d <- nrow(active)
   } else {
-    d = length(active)
+    d <- length(active)
   }
 
   if(gui) {
-    printClanc = function(msg) {
+    printClanc <- function(msg) {
       assign("shareMsg", msg, prntFrm)
       eval(expression(postMsg(shareMsg)), prntFrm)
     }
   } else {
-    printClanc = cat
+    printClanc <- cat
   }
 
-  cv.error = array(rep(0, d * folds * p), dim = c(d, folds, p))
+  cv.error <- array(rep(0, d * folds * p), dim = c(d, folds, p))
 
-  cv.err.cnt.cls = matrix(NA, nrow = d, ncol = p)
-  cv.err.prpn.cls = matrix(NA, nrow = d, ncol = p)
-  n.features.cls = matrix(NA, nrow = d, ncol = p)
-  n.features.ttl = rep(NA, d)
+  cv.err.cnt.cls <- matrix(NA, nrow = d, ncol = p)
+  cv.err.prpn.cls <- matrix(NA, nrow = d, ncol = p)
+  n.features.cls <- matrix(NA, nrow = d, ncol = p)
+  n.features.ttl <- rep(NA, d)
 
-  ID = model.matrix(~ factor(id) - 1)
-  dimnames(ID) = list(NULL, names(nn))
+  ID <- model.matrix(~ factor(id) - 1)
+  dimnames(ID) <- list(NULL, names(nn))
 
   ## cross validation
   printClanc("CV:")
@@ -61,44 +61,44 @@ cvClanc <- function(data, id, prior = "equal", active = 1:10, gui = F, prntFrm =
     printClanc(i)
 
     ## form initial statistics
-    v = length(cvIdx[[i]])
-    X = data[, -cvIdx[[i]]]
-    Y = data[, cvIdx[[i]]]
-    jd = id[-cvIdx[[i]]]
-    truth = id[cvIdx[[i]]]
-    JD = ID[-cvIdx[[i]], ]
+    v <- length(cvIdx[[i]])
+    X <- data[, -cvIdx[[i]]]
+    Y <- data[, cvIdx[[i]]]
+    jd <- id[-cvIdx[[i]]]
+    truth <- id[cvIdx[[i]]]
+    JD <- ID[-cvIdx[[i]], ]
 
-    mm = table(jd)
-    m.k = sqrt(1 / mm - 1 / (n - v))
+    mm <- table(jd)
+    m.k <- sqrt(1 / mm - 1 / (n - v))
 
     ## pooled standard deviations
-    p.sd = pooledSDClanc(X, JD)
+    p.sd <- pooledSDClanc(X, JD)
 
     ## class- and overall-centroids
-    cntrd.k = scale(X %*% JD, center = F, scale = mm)
-    cntrd.o = drop(X %*% rep(1 / (n - v), n - v))
+    cntrd.k <- scale(X %*% JD, center = FALSE, scale = mm)
+    cntrd.o <- drop(X %*% rep(1 / (n - v), n - v))
 
     ## form statistics and order them
-    d.k = scale((cntrd.k - cntrd.o) / p.sd, center = F, scale = m.k)
-    d.k.ord = orderStatsClanc(d.k = d.k)
+    d.k <- scale((cntrd.k - cntrd.o) / p.sd, center = FALSE, scale = m.k)
+    d.k.ord <- orderStatsClanc(d.k = d.k)
 
     ## select genes, update inactive centroid components
     for(j in 1:d) {
       if(is.matrix(active))
-        aa = active[j, ]
+        aa <- active[j, ]
       else
-        aa = active[j]
+        aa <- active[j]
 
-      selected = selectClanc(d.k = d.k, d.k.ord = d.k.ord, active = aa)
-      active.idx = (1:m)[drop(selected %*% rep(1, p)) != 0]
+      selected <- selectClanc(d.k = d.k, d.k.ord = d.k.ord, active = aa)
+      active.idx <- (1:m)[drop(selected %*% rep(1, p)) != 0]
 
-      cntrds = cntrd.k[active.idx, ]
+      cntrds <- cntrd.k[active.idx, ]
       for(k in 1:p)
         cntrds[selected[active.idx, k] == 0, k] = cntrd.o[active.idx][selected[active.idx, k] == 0]
 
       ## classify test sample and assess error status
       for(k in 1:v) {
-        dd = distClanc(data = Y[active.idx, k], cntrds = cntrds, sd = p.sd[active.idx], prior = pi.k)
+        dd <- distClanc(data = Y[active.idx, k], cntrds = cntrds, sd = p.sd[active.idx], prior = pi.k)
 
         if(match(min(dd), dd) != truth[k])
           cv.error[j, i, truth[k]] = cv.error[j, i, truth[k]] + 1
@@ -109,13 +109,13 @@ cvClanc <- function(data, id, prior = "equal", active = 1:10, gui = F, prntFrm =
   ## record numbers and proportions of errors
   for(i in 1:p) {
     if(d > 1)
-      cv.err.cnt.cls[, i] = apply(cv.error[, , i], 1, sum)
+      cv.err.cnt.cls[, i] <- apply(cv.error[, , i], 1, sum)
     else
-      cv.err.cnt.cls[, i] = sum(cv.error[, , i])
-    cv.err.prpn.cls[, i] = cv.err.cnt.cls[, i] / nn[i]
+      cv.err.cnt.cls[, i] <- sum(cv.error[, , i])
+    cv.err.prpn.cls[, i] <- cv.err.cnt.cls[, i] / nn[i]
   }
-  cv.err.cnt.ttl = apply(cv.err.cnt.cls, 1, sum)
-  cv.err.prpn.ttl = cv.err.cnt.ttl / n
+  cv.err.cnt.ttl <- apply(cv.err.cnt.cls, 1, sum)
+  cv.err.prpn.ttl <- cv.err.cnt.ttl / n
 
   printClanc("\n")
   list("classErrors" = cv.err.prpn.cls, "overallErrors" = cv.err.prpn.ttl, "prior" = pi.k)
