@@ -26,11 +26,7 @@ cvClanc <- function(data, id, prior = "equal", active = 1:10) {
       pi.k <- nn / n
   }
 
-  if (is.matrix(active)) {
-    d <- nrow(active)
-  } else {
-    d <- length(active)
-  }
+  d <- ifelse(is.matrix(active), nrow(active), length(active))
 
   cv.error <- array(rep(0, d * folds * p), dim = c(d, folds, p))
 
