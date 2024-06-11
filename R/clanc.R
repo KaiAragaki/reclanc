@@ -27,7 +27,7 @@ cvClanc <- function(data, id, priors = "equal", active = 1:10, folds = 5) {
   n.features.cls <- matrix(NA, nrow = d, ncol = p)
   n.features.ttl <- rep(NA, d)
 
-  ID <- model.matrix(~ factor(id) - 1)
+  ID <- model.matrix(~ factor(id) - 1) # one-hot encoded matrix
   dimnames(ID) <- list(NULL, names(nn))
 
   ## cross validation
@@ -36,12 +36,12 @@ cvClanc <- function(data, id, priors = "equal", active = 1:10, folds = 5) {
     cat(i)
 
     ## form initial statistics
-    v <- length(cvIdx[[i]])
-    X <- data[, -cvIdx[[i]]]
-    Y <- data[, cvIdx[[i]]]
-    jd <- id[-cvIdx[[i]]]
-    truth <- id[cvIdx[[i]]]
-    JD <- ID[-cvIdx[[i]], ]
+    v <- length(cvIdx[[i]]) # n samples in this fold
+    X <- data[, -cvIdx[[i]]] # samples not in this fold
+    Y <- data[, cvIdx[[i]]] # samples in this fold
+    jd <- id[-cvIdx[[i]]] # ids not in this fold
+    truth <- id[cvIdx[[i]]] # ids in this fold
+    JD <- ID[-cvIdx[[i]], ] #
 
     mm <- table(jd)
     m.k <- sqrt(1 / mm - 1 / (n - v))
