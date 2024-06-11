@@ -1,4 +1,5 @@
-# Everything here comes from https://github.com/naikai/sake or is a modification of it.
+# Everything here comes from https://github.com/naikai/sake or is a modification
+# of it.
 
 #' @param data expression data. (m x n) matrix of class numeric.
 #' @param id class id's. n vector of class numeric.
