@@ -16,12 +16,10 @@ cvClanc <- function(data, id, priors = "equal", active = 1:10, folds = 5) {
   nn <- as.numeric(table(id))
   folds <- length(cvIdx)
 
-
-  d <- ifelse(is.matrix(active), nrow(active), length(active))
   class_priors <- make_class_priors(priors = priors, data = data, id = id)
+  d <- length(active)
 
   cv.error <- array(rep(0, d * folds * p), dim = c(d, folds, p))
-
   cv.err.cnt.cls <- matrix(NA, nrow = d, ncol = p)
   cv.err.prpn.cls <- matrix(NA, nrow = d, ncol = p)
   n.features.cls <- matrix(NA, nrow = d, ncol = p)
