@@ -356,7 +356,13 @@ get_ClaNC_group <- function(Build_out){
 #' # Assuming we're happy with using 5 features per class as the basis for our
 #' # model, we can now train and build our final classifier.
 #'
-run_ClaNC <- function(data, groups, ColSideColors, active.features=20, est.num=20, select.features=10, file.prefix="ClaNC", skip.est=FALSE){
+run_ClaNC <- function(data,
+                      groups,
+                      active.features = 20,
+                      est.num = 20,
+                      select.features = 10,
+                      file.prefix = "ClaNC",
+                      skip.est = FALSE) {
 
   Y_train <- as.matrix(data)
   idd <- as.numeric(factor(groups))
