@@ -1,3 +1,6 @@
+#' @param d.kiu
+#' @param d.k.ord
+#' @param active
 select_clanc <- function(d.k, d.k.ord, active) {
   m = nrow(d.k)
   p = ncol(d.k)
