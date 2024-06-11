@@ -54,8 +54,7 @@ cv_clanc <- function(data, id, priors = "equal", active = 1:10, folds = 5) {
 
     ## select genes, update inactive centroid components
     for(j in seq_len(d)) {
-      # FIXME
-      aa <- ifelse(is.matrix(active), active[j, ], active[j])
+      aa <- active[j]
       selected <- selectClanc(d.k = d.k, d.k.ord = d.k.ord, active = aa)
       active.idx <- seq_len(nrow_data)[drop(selected %*% rep(1, p)) != 0]
       cntrds <- cntrd.k[active.idx, ]
