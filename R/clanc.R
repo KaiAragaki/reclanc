@@ -92,22 +92,6 @@ cvClanc <- function(data, id, priors = "equal", active = 1:10) {
   list(classErrors = cv.err.prpn.cls, overallErrors = cv.err.prpn.ttl, prior = class_priors)
 }
 
-make_class_priors <- function(priors, id, data) {
-  n_classes <- length(unique(id))
-  n_samples <- ncol(data)
-  samples_per_class <- as.numeric(table(id))
-  class_proportions <- n_samples / samples_per_class
-
-  if (is.numeric(priors)) {
-    stopifnot(length(priors) == n_classes, sum(priors) == 1, all(priors >= 0))
-    return(priors)
-  }
-
-  stopifnot(prior %in% c("equal", "class"))
-  if (priors == "equal") return(rep(1 / n_classes, n_classes))
-  if (priors == "class") return(class_proportions)
-}
-
 buildClanc <- function(data, id, cNames, train, active) {
   m = nrow(data)
   n = ncol(data)
@@ -292,31 +276,6 @@ pooledSDClanc <- function(X, ID) {
   dif2 = (X - mn %*% t(ID)) ^ 2
 
   sqrt(drop(dif2 %*% rep(1 / (n - p), n)))
-}
-
-balancedFolds <- function(y, nfolds) {
-
-  totals = table(y)
-  fmax = max(totals)
-  nfolds = min(nfolds, fmax)
-  folds = as.list(seq(nfolds))
-  yids = split(seq(y), y)
-  bigmat = matrix(NA, ceiling(fmax / nfolds) * nfolds, length(totals))
-  for(i in seq(totals))
-    bigmat[seq(totals[i]), i] = sample(yids[[i]])
-  smallmat = matrix(bigmat, nrow = nfolds)
-  smallmat = permute_rows(t(smallmat))
-  res = vector("list", nfolds)
-  for(j in 1:nfolds) {
-    jj = !is.na(smallmat[, j])
-    res[[j]] = smallmat[jj, j]
-  }
-
-  res
-}
-
-permute_rows <- function(x) {
-  t(apply(x, 1, sample))
 }
 
 distClanc <- function(data, cntrds, sd, prior) {
