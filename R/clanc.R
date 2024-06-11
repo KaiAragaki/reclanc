@@ -88,7 +88,7 @@ trainClanc <- function(data, id, geneNames, prior = "equal") {
   ID = model.matrix(~ factor(id) - 1)
 
   ## pooled standard deviations
-  p.sd = pooledSDClanc(data, ID)
+  p.sd = pooled_sd_clanc(data, ID)
 
   ## class and overall centroids
   cntrd.k = scale(data %*% ID, center = F, scale = nn)
@@ -120,18 +120,6 @@ orderStatsClanc <- function(d.k) {
   no.ties = apply(d.k.o, 2, function(x) { !duplicated(x) })
 
   list(d.k.rnks = d.k.rnks, d.k.o = d.k.o, no.ties = no.ties)
-}
-
-pooledSDClanc <- function(X, ID) {
-  m = nrow(X)
-  n = ncol(X)
-  p = ncol(ID)
-  nn = drop(t(ID) %*% rep(1, n))
-
-  mn = t(t(X %*% ID) / nn)
-  dif2 = (X - mn %*% t(ID)) ^ 2
-
-  sqrt(drop(dif2 %*% rep(1 / (n - p), n)))
 }
 
 distClanc <- function(data, cntrds, sd, prior) {

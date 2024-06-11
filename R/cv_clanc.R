@@ -44,7 +44,7 @@ cv_clanc <- function(data, id, priors = "equal", active = 1:10, n_folds = 5) {
     m.k <- sqrt(1 / mm - 1 / (ncol_data - v))
 
     ## pooled standard deviations
-    p.sd <- pooledSDClanc(X, JD)
+    p.sd <- pooled_sd_clanc(X, JD)
 
     ## class- and overall-centroids
     cntrd.k <- scale(X %*% JD, center = FALSE, scale = mm)
