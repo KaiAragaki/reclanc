@@ -38,7 +38,7 @@ cv_clanc <- function(data, id, priors = "equal", active = 1:10, n_folds = 5) {
     Y <- data[, fold_indices[[i]]] # samples in this fold
     jd <- id[-fold_indices[[i]]] # ids not in this fold
     truth <- id[fold_indices[[i]]] # ids in this fold
-    JD <- ID[-fold_indices[[i]], ] #
+    JD <- ID[-fold_indices[[i]], ] # Samples not in this fold (one-hot)
 
     mm <- table(jd)
     m.k <- sqrt(1 / mm - 1 / (ncol_data - v))
@@ -58,7 +58,7 @@ cv_clanc <- function(data, id, priors = "equal", active = 1:10, n_folds = 5) {
 
     # For each item in the active vector
     for (j in seq_len(d)) {
-      aa <- active[j]
+      aa <- active[j] # Number of active genes to consider
       selected <- select_clanc(d.k = d.k, d.k.ord = d.k.ord, active = aa)
       active.idx <- seq_len(nrow_data)[drop(selected %*% rep(1, p)) != 0]
       cntrds <- cntrd.k[active.idx, ]
