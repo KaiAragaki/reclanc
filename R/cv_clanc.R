@@ -52,7 +52,7 @@ cv_clanc <- function(data, id, priors = "equal", active = 1:10, n_folds = 5) {
 
     ## form statistics and order them
     d.k <- scale((cntrd.k - cntrd.o) / p.sd, center = FALSE, scale = m.k)
-    d.k.ord <- orderStatsClanc(d.k = d.k)
+    d.k.ord <- order_stats_clanc(d.k = d.k)
 
     ## select genes, update inactive centroid components
 

@@ -96,7 +96,7 @@ trainClanc <- function(data, id, geneNames, prior = "equal") {
 
   ## form statistics and order them
   d.k = scale((cntrd.k - cntrd.o) / p.sd, center = F, scale = m.k)
-  d.k.ord = orderStatsClanc(d.k = d.k)
+  d.k.ord = order_stats_clanc(d.k = d.k)
 
   list(
     pooledSD = p.sd,
@@ -111,16 +111,6 @@ trainClanc <- function(data, id, geneNames, prior = "equal") {
   )
 }
 
-orderStatsClanc <- function(d.k) {
-  m = nrow(d.k)
-  p = ncol(d.k)
-
-  d.k.rnks = apply(d.k, 2, function(x) { order(abs(x), decreasing = T) })
-  d.k.o = matrix(d.k[as.numeric(d.k.rnks) + m * rep(0:(p - 1), each = m)], nrow = m)
-  no.ties = apply(d.k.o, 2, function(x) { !duplicated(x) })
-
-  list(d.k.rnks = d.k.rnks, d.k.o = d.k.o, no.ties = no.ties)
-}
 
 distClanc <- function(data, cntrds, sd, prior) {
   vv = sd ^ 2
