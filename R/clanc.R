@@ -257,7 +257,7 @@ get_ClaNC_group <- function(Build_out){
 #' # to use cross-validation to estimate the error rates for classifiers of
 #' # different sizes (different numbers of genes used in building the
 #' # classifier). THEN View the estimated error rates associated with different
-#' # feature-set sizes. By default, cvClanc() will assess the classifiers built
+#' # feature-set sizes. By default, cv_clanc() will assess the classifiers built
 #' # using 1, 2, 3, ..., 10 features. In this example, an estimated
 #' # 100% accuracy is attained with as few as 5 features per class.
 #'
@@ -281,7 +281,7 @@ run_ClaNC <- function(data,
     cv_total <- NULL
     cv_out <- NULL
     for (i in 1:est.num){
-      cv_out = cvClanc(Y_train, idd, active=1:active.features, prior="class")
+      cv_out = cv_clanc(Y_train, idd, active=1:active.features, prior="class")
       cv_total = rbind(cv_total, cbind(1:active.features, cv_out$overallErrors))
     }
     colnames(cv_total) <- c("NumFeatures", "CV_Error")
