@@ -2,9 +2,9 @@
 # of it.
 
 #' @param data expression data. (m x n) matrix of class numeric.
-#' @param id class id's. n vector of class numeric.
-#' @param prior either a vector of length p, "equal", or "class". if "equal",
-#'   then equal probabilities will be used for each class. if "class", then the
+#' @param id class IDs. n vector of class numeric.
+#' @param priors either a numeric vector of length p, "equal", or "class". If
+#'   "equal", equal probabilities will be used for each class. If "class", the
 #'   proportions of each class in the training data will be used as the prior.
 #' @param active how many active features to consider? can either be a single
 #'   number or a vector containing a range of values to consider.
