@@ -19,6 +19,7 @@ cvClanc <- function(data, id, priors = "equal", active = 1:10, folds = 5) {
   class_priors <- make_class_priors(priors)
 
   d <- ifelse(is.matrix(active), nrow(active), length(active))
+  class_priors <- make_class_priors(priors = priors, data = data, id = id)
 
   cv.error <- array(rep(0, d * folds * p), dim = c(d, folds, p))
 
