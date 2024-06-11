@@ -16,7 +16,6 @@ cvClanc <- function(data, id, priors = "equal", active = 1:10, folds = 5) {
   nn <- as.numeric(table(id))
   folds <- length(cvIdx)
 
-  class_priors <- make_class_priors(priors)
 
   d <- ifelse(is.matrix(active), nrow(active), length(active))
   class_priors <- make_class_priors(priors = priors, data = data, id = id)
