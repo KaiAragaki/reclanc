@@ -8,8 +8,8 @@
 #'   proportions of each class in the training data will be used as the prior.
 #' @param active how many active features to consider? can either be a single
 #'   number or a vector containing a range of values to consider.
-cvClanc <- function(data, id, priors = "equal", active = 1:10) {
-  cvIdx <- balancedFolds(id, 5)
+cvClanc <- function(data, id, priors = "equal", active = 1:10, folds = 5) {
+  cvIdx <- make_balanced_folds(id, folds)
   nrow_data <- nrow(data)
   n <- ncol(data)
   p <- length(unique(id))
