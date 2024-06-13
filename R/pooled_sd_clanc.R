@@ -5,9 +5,12 @@ add_pooled_sd <- function(expression) {
   expression |>
     dplyr::mutate(
       class_mean_exp = mean(.data$expression, na.rm = TRUE),
-      squared_error = (.data$expression - .data$class_mean_exp)^2,
-      pooled_sd = sqrt(.data$squared_error / df),
+      sqd_error = (.data$expression - .data$class_mean_exp)^2,
       .by = c("class", "gene")
+    ) |>
+    dplyr::mutate(
+      pooled_sd = sqrt(sum(.data$sqd_error, na.rm = TRUE) / df),
+      .by = "gene"
     ) |>
     dplyr::select(-c("class_mean_exp", "squared_error"))
 }
