@@ -1,52 +1,59 @@
-#' @param d.kiu
-#' @param d.k.ord
-#' @param active
-select_clanc <- function(d.k, d.k.ord, active) {
-  m = nrow(d.k)
-  p = ncol(d.k)
-  d.k.rnks = d.k.ord$d.k.rnks
-  d.k.o = d.k.ord$d.k.o
-  no.ties = d.k.ord$no.ties
+#' @param dk a matrix of statistics, where each column is a class and each row
+#'   is a gene
+#' @param active number of active genes to consider. Can either be a single
+#'   number (in which case the same number of active genes will be used for each
+#'   class) or a vector of numbers of length equal to the number of classes,
+#'   with the order corresponding to the levels of the classes factor.
+clanc_select <- function(dk, active) {
+  active <- validate_active(dk, active)
+  active <- data.frame(
+    class = levels(dk$class),
+    active = active
+  )
+  all <- dplyr::left_join(dk, active, by = "class")
+  all$reserved <- FALSE
+  all$n_win <- 0
+  selection_recurse(all) |>
+    dplyr::filter(gets) |>
+    dplyr::select(class, gene_id)
+}
 
-  if(length(active) != p)
-      active = rep(active, p)
-  if(any(active >= m))
-      selected = matrix(1, nrow = m, ncol = p)
-  else {
-    if(any((avail <- t(no.ties) %*% rep(1, m)) < active)) {
-      active[avail < active] = avail[avail < active]
+selection_recurse <- function(df) {
+  if (all(df$reserved) || all(df$n_win >= df$active)) return(NULL)
+  df <- df |>
+    filter(!reserved, n_win < active) |>
+    arrange(gene_id, rank, desc(abs_stat)) |>
+    mutate(n = 1:n(), win = n == 1, .by = "gene_id") |>
+    arrange(class, rank) |>
+    mutate(
+      n_win = n_win + cumsum(win),
+      gets = win & (n_win <= active),
+      .by = "class"
+    ) |>
+    mutate(reserved = any(gets), .by = "gene_id") |>
+    mutate(n_win = max(n_win), .by = "class")
+  rbind(df, selection_round(df))
+}
 
-      warning("Not enough unique genes in at least one class.")
-    }
+validate_active <- function(dk, active) {
+  # NOTE will this cause a problem if a give fold doesn't have a level of a
+  # class?
+  n_classes <- length(levels(dk$class))
 
-    selected = matrix(0, nrow = m, ncol = p)
+  if (!length(active) %in% c(1, n_classes)) stop("Invalid `length(active)`")
 
-    jdx = vector("list", p)
-    delta = rep(NA, p)
-    for(i in 1:p) {
-      jdx[[i]] = d.k.rnks[no.ties[, i], i][1:active[i]]
-      delta[i] = d.k.o[no.ties[, i], i][active[i] + 1]
-    }
-    cls = rep(1:p, active)
+  df <- aggregate(no_tie ~ classes, dk, sum)
+  df <- df[order(df$classes), ] # Order rows by class factor...just in case.
+  df$active <- active
+  df$n_genes <- length(unique(dk$gene_id))
 
-    while(any((kdx <- table(unlist(jdx))) > 1)) {
-      nms = as.numeric(names(kdx))
-      for(j in as.numeric(names(kdx))[kdx > 1]) {
-        ldx = cls[unlist(jdx) == j]
-
-        ii = match(max(abs(d.k[j, ldx])), abs(d.k[j, ldx]))
-
-        for(k in ldx[-ii]) {
-          active[k] = active[k] + 1
-          jdx[[k]] = c(jdx[[k]][-match(j, jdx[[k]])], d.k.rnks[no.ties[, k], k][active[k]])
-          delta[k] = d.k.o[no.ties[, k], k][active[k] + 1]
-        }
-      }
-    }
-
-    for(i in 1:p)
-      selected[jdx[[i]], i] = 1
+  if (any(df$active > df$n_genes)) {
+    warning("# active genes > # genes available in at least one class")
+    message("Using all genes for those classes.")
   }
-
-  return(selected)
+  if (any(df$active > df$no_tie)) {
+    warning("# active genes > # uniquely ranked genes in at least one class")
+    message("Reducing active gene number for this class to max possible.")
+  }
+  mapply(min, df$no_ties, df$n_genes, df$active)
 }
