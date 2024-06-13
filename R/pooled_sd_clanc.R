@@ -1,11 +1,13 @@
-#' @param exp An expression matrix, where rows are genes and columns are
-#'   samples
-#' @param classes_one_hot A one-hot encoded matrix of classes
-#' @return A vector containing a pooled SD for each gene
-pooled_sd_clanc <- function(exp, classes_one_hot) {
-  df <- ncol(exp) - ncol(classes_one_hot)
-  samples_per_class <- colSums(classes_one_hot)
-  avg_gene_exp_per_class <- t(t(exp %*% classes_one_hot) / samples_per_class)
-  squared_error <- (exp - (avg_gene_exp_per_class %*% t(classes_one_hot)))^2
-  sqrt(rowSums(squared_error / df))
+add_pooled_sd <- function(expression) {
+  n_classes <- length(levels(expression$classes))
+  n_samples <- length(unique(expression$sample_id))
+  df <- n_samples - n_classes
+  expression |>
+    dplyr::mutate(
+      class_mean_exp = mean(.data$expression, na.rm = TRUE),
+      squared_error = (.data$expression - .data$class_mean_exp)^2,
+      pooled_sd = sqrt(.data$squared_error / df),
+      .by = c("class", "gene")
+    ) |>
+    dplyr::select(-c("class_mean_exp", "squared_error"))
 }
