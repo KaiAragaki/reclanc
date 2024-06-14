@@ -32,7 +32,7 @@ cv_clanc <- function(expression,
     ## select genes, update inactive centroid components
     class_stats <- class_stats |>
       mark_active_genes(active) |>
-      dplyr::filter(any(.data$gets), .by = "gene") |>
+      dplyr::filter(any(.data$gets), .by = "gene_id") |>
       dplyr::mutate(
         final_centroid = dplyr::if_else(
           .data$gets, .data$class_centroid, .data$overall_centroid
