@@ -50,13 +50,15 @@ selection_recurse <- function(expression) {
       !.data$reserved,
       .data$n_win < .data$active
     ) |>
-    dplyr::arrange(.data$gene_id, .data$rank, dplyr::desc(.data$abs_stat)) |>
+    dplyr::arrange(
+      .data$gene_id, .data$class_rank, dplyr::desc(.data$abs_stat)
+    ) |>
     dplyr::mutate(
       n = seq_len(dplyr::n()),
       win = .data$n == 1,
       .by = "gene_id"
     ) |>
-    dplyr::arrange(.data$class, .data$rank) |>
+    dplyr::arrange(.data$class, .data$class_rank) |>
     dplyr::mutate(
       n_win = .data$n_win + cumsum(.data$win),
       gets = .data$win & (.data$n_win <= .data$active),
