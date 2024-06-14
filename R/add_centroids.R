@@ -1,4 +1,4 @@
-add_centroids <- function(expression) {
+add_class_and_overall_means <- function(expression) {
   expression |>
     dplyr::mutate(
       class_centroid = mean(.data$expression, na.rm = TRUE),

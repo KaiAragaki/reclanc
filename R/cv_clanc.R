@@ -25,7 +25,7 @@ cv_clanc <- function(expression,
     other_folds <-  dplyr::filter(expression, .data$fold != i)
 
     class_stats <- other_folds |>
-      add_centroids() |>
+      add_class_and_overall_means() |>
       add_pooled_sd() |>
       add_stats()
 
