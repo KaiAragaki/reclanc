@@ -87,5 +87,5 @@ validate_active <- function(expression, active) {
     warning("# active genes > # uniquely ranked genes in at least one class")
     message("Reducing active gene number for this class to max possible.")
   }
-  mapply(min, df$no_ties, df$n_genes, df$active)
+  mapply(min, df$no_tie, df$n_genes, df$active)
 }
