@@ -4,7 +4,7 @@
 #'   will be given to all classes. If "class", a prior based on class frequency
 #'   will be used.
 add_priors <- function(expression, priors) {
-  priors <- validate_priors(expression, priors)
+  validate_priors(expression, priors)
 
   df <- data.frame(
     class = levels(expression$class),
