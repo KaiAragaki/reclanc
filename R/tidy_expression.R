@@ -23,4 +23,3 @@ tidy_expression <- function(expression, classes) {
   colnames(out) <- c("expression", "class", "sample_id", "gene_id")
   out
 }
-
