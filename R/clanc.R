@@ -111,19 +111,6 @@ trainClanc <- function(data, id, geneNames, prior = "equal") {
   )
 }
 
-
-distClanc <- function(data, cntrds, sd, prior) {
-  vv = sd ^ 2
-  pi.k = prior
-
-  if(length(vv) > 1)
-    dd = drop(t(cntrds ^ 2) %*% (1 / vv)) - 2 * drop(t(data * cntrds) %*% (1 / vv)) - 2 * log(pi.k)
-  else
-    dd = drop(cntrds ^ 2 / vv) - 2 * drop(data * cntrds / vv) - 2 * log(pi.k)
-
-  return(dd)
-}
-
 #' Get ClaNC Group info
 #'
 #' Extract which group each point belongs to
