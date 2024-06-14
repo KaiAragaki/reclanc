@@ -9,7 +9,10 @@ add_pooled_sd <- function(expression) {
       n_classes = length(levels(.data$class)),
       df = .data$n_samples - .data$n_classes
     ) |>
-    dplyr::mutate(class_size = dplyr::n(), .by = "class") |>
+    dplyr::mutate(
+      class_size = length(unique(.data$sample_id)),
+      .by = "class"
+    ) |>
     dplyr::mutate(
       sqd_error = (.data$expression - .data$class_centroid)^2,
       .by = c("class", "gene_id")
