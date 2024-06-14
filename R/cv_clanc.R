@@ -12,8 +12,8 @@ cv_clanc <- function(expression,
                      n_folds = 5) {
   stopifnot(
     is.factor(classes),
-    is.matrix(data),
-    ncol(data) == length(classes)
+    is.matrix(expression),
+    ncol(expression) == length(classes)
   )
   expression <- tidy_expression(expression, classes) |>
     add_folds(n_folds) |>
