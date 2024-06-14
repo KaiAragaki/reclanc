@@ -18,10 +18,9 @@ add_pooled_sd <- function(expression) {
       .by = c("class", "gene_id")
     ) |>
     dplyr::summarize(
+      df = unique(.data$df),
       pooled_sd = sqrt(sum(.data$sqd_error, na.rm = TRUE) / .data$df),
-      .by = c(
-        "class", "gene_id", "n_samples", "n_classes", "class_size",
-        "class_centroid", "overall_centroid", "prior"
-      )
+      .by = c("class", "gene_id", "n_classes", "n_samples", "class_size",
+              "class_centroid", "overall_centroid", "prior")
     )
 }
