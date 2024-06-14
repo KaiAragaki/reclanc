@@ -1,33 +1,3 @@
-#' @param classes A factor vector of classes.
-#' @param n_folds number of folds
-#' @return a `data.frame` with columns `id`, `class`, and `fold`. `id`
-#'   represents the original order of the classes.
-balance_folds <- function(classes, n_folds) {
-  validate_folds(classes, n_folds)
-  fold_table <- make_fold_table(classes, n_folds)
-
-  # Shuffle all samples in case there's an inherent order
-
-
-  cuts <- data.frame(
-    class = classes,
-    id = seq_along(classes)
-  ) |>
-    split(~class) |>
-    lapply(\(x) {
-      # Shuffle rows in case there's any inherent order
-      x <- x[sample(seq_len(nrow(x))), ]
-      x$class_id <- seq_len(nrow(x))
-      x$cut <- as.numeric(cut(x$class_id, n_folds))
-      x
-    })
-  cuts <- do.call(rbind, cuts)
-  out <- merge(cuts, fold_table, all.x = TRUE)
-  out[order(out$id), c("id", "class", "fold")]
-}
-
-
-
 add_folds <- function(expression, n_folds) {
   validate_folds(expression, n_folds)
 
@@ -39,10 +9,7 @@ validate_folds <- function(expression, n_folds) {
   stopifnot(is.factor(expression$class))
 
   if (n_folds > min(table(expression$class))) {
-    warning(
-      "More folds than unique items in class. ",
-      "Some folds won't have all classes."
-    )
+    stop("More folds than unique items in class")
   }
 }
 

@@ -1,3 +1,7 @@
+#' @param active can either be a single number, in which case the same number of
+#'   active genes will be used for all classes, or a vector of numbers with
+#'   length equal to the number of classes. The order of the number of active
+#'   genes must correspond to the factor levels of the classes.
 mark_active_genes <- function(expression, active) {
   active <- validate_active(expression, active)
   active <- data.frame(
@@ -29,9 +33,9 @@ mark_active_genes <- function(expression, active) {
 #
 # After this is done for all genes, the genes are arranged by class and rank.
 #
-# Classes only take as many genes as they need, and other their top picks. If a
-# class wins more genes than it needs, it will recuse itself from further rounds
-# and release the unneeded genes.
+# Classes only take as many genes as they need, starting with their top picks.
+# If a class wins more genes than it needs, it will recuse itself from further
+# rounds and release the unneeded genes.
 #
 # Any genes that were needed and taken are marked as reserved.
 #
