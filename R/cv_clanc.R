@@ -41,7 +41,7 @@ cv_clanc <- function(expression,
 
     current_fold |>
       dplyr::rename(truth = class) |>
-      dplyr::semi_join(by = "gene_id") |>
+      dplyr::semi_join(class_stats, by = "gene_id") |>
       dplyr::full_join(class_stats, by = "gene_id") |>
       dplyr::mutate(
         dist = ((.data$expression - .data$class_centroid) / .data$pooled_sd)^2
