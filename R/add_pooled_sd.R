@@ -5,8 +5,8 @@
 add_pooled_sd <- function(expression) {
   expression |>
     dplyr::mutate(
-      n_samples = length(unique(expression$sample_id)),
-      n_classes = length(levels(expression$classes)),
+      n_samples = length(unique(.data$sample_id)),
+      n_classes = length(levels(.data$class)),
       df = .data$n_samples - .data$n_classes
     ) |>
     dplyr::mutate(class_size = dplyr::n(), .by = "class") |>
