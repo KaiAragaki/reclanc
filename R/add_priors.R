@@ -7,7 +7,7 @@ add_priors <- function(expression, priors) {
   validate_priors(expression, priors)
 
   df <- data.frame(
-    class = levels(expression$class),
+    class = factor(levels(expression$class), levels(expression$class)),
     n = as.numeric(table(expression$class))
   )
 
