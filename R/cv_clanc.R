@@ -41,6 +41,7 @@ cv_clanc <- function(expression,
 
     current_fold |>
       dplyr::rename(truth = class) |>
+      dplyr::select(-"prior") |>
       dplyr::semi_join(class_stats, by = "gene_id") |>
       dplyr::full_join(class_stats, by = "gene_id") |>
       dplyr::mutate(
