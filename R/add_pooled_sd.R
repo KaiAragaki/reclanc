@@ -18,7 +18,7 @@ add_pooled_sd <- function(expression) {
       pooled_sd = sqrt(sum(.data$sqd_error, na.rm = TRUE) / .data$df),
       .by = c(
         "class", "gene_id", "n_samples", "n_classes", "class_size",
-        "class_centroid", "overall_centroid"
+        "class_centroid", "overall_centroid", "prior"
       )
     )
 }
