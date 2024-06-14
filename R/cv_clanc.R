@@ -48,7 +48,7 @@ cv_clanc <- function(expression,
       ) |>
       dplyr::summarize(
         sum_dist = sum(.data$dist) - 2 * log(.data$prior),
-        .by = c("sample", "class", "truth")
+        .by = c("sample_id", "class", "truth")
       ) |>
       dplyr::filter(
         .data$sum_dist == min(.data$sum_dist),
