@@ -6,8 +6,7 @@ mark_active_genes <- function(expression, active) {
   )
   dplyr::left_join(expression, active, by = "class") |>
     dplyr::mutate(reserved = FALSE, n_win = 0) |>
-    selection_recurse() |>
-    dplyr::filter(.data$gets)
+    selection_recurse()
 }
 
 # The meat of the select function
