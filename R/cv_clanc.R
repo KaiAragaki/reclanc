@@ -48,11 +48,12 @@ cv_clanc <- function(expression,
         dist = ((.data$expression - .data$class_centroid) / .data$pooled_sd)^2
       ) |>
       dplyr::summarize(
-        sum_dist = sum(.data$dist) - 2 * log(.data$prior),
-        .by = c("sample_id", "class", "truth")
+        sum_dist = sum(.data$dist),
+        .by = c("sample_id", "class", "truth", "prior")
       ) |>
+      dplyr::mutate(final_dist = .data$sum_dist - 2 * log(.data$prior)) |>
       dplyr::filter(
-        .data$sum_dist == min(.data$sum_dist),
+        .data$final_dist == min(.data$final_dist),
         .by = "class"
       )
   }
