@@ -54,7 +54,7 @@ cv_clanc <- function(expression,
       dplyr::mutate(final_dist = .data$sum_dist - 2 * log(.data$prior)) |>
       dplyr::filter(
         .data$final_dist == min(.data$final_dist),
-        .by = "class"
+        .by = "sample_id"
       )
   }
 }
