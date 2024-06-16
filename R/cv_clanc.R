@@ -18,43 +18,14 @@ cv_clanc <- function(expression,
   expression <- tidy_expression(expression, classes) |>
     add_folds(n_folds) |>
     add_priors(priors)
-
   # cross validation
+  out <- data.frame()
   for (i in seq_len(n_folds)) {
-    current_fold <- dplyr::filter(expression, .data$fold == i)
-    other_folds <-  dplyr::filter(expression, .data$fold != i)
-
-    class_stats <- other_folds |>
-      add_class_and_overall_means() |>
-      add_pooled_sd() |>
-      add_stats()
-
-    ## select genes, update inactive centroid components
-    class_stats <- class_stats |>
-      mark_active_genes(active) |>
-      dplyr::filter(any(.data$gets), .by = "gene_id") |>
-      dplyr::mutate(
-        final_centroid = dplyr::if_else(
-          .data$gets, .data$class_centroid, .data$overall_centroid
-        )
-      )
-
-    current_fold |>
-      dplyr::rename(truth = class) |>
-      dplyr::select(-"prior") |>
-      dplyr::semi_join(class_stats, by = "gene_id") |>
-      dplyr::full_join(class_stats, by = "gene_id") |>
-      dplyr::mutate(
-        dist = ((.data$expression - .data$class_centroid) / .data$pooled_sd)^2
-      ) |>
-      dplyr::summarize(
-        sum_dist = sum(.data$dist),
-        .by = c("sample_id", "class", "truth", "prior")
-      ) |>
-      dplyr::mutate(final_dist = .data$sum_dist - 2 * log(.data$prior)) |>
-      dplyr::filter(
-        .data$final_dist == min(.data$final_dist),
-        .by = "sample_id"
-      )
+    test <- dplyr::filter(expression, .data$fold == i)
+    train <-  dplyr::filter(expression, .data$fold != i)
+    centroids <- make_centroids(train, active)
+    new <- predict_from_centroids(test, centroids)
+    out <- rbind(out, new)
   }
+  out
 }
