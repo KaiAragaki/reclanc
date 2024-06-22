@@ -8,23 +8,24 @@ filter_predictors <- function(fit, predictors) {
 calc_dist <- function(all) {
   user_col_ids <- seq(from = 7, to = ncol(all))
   user_data <- all[, user_col_ids, drop = FALSE]
-  zs <- user_data |>
-    sweep(1, all$expression) |>
-    sweep(1, all$pooled_sd, FUN = "/")
+
+  vv <- all$pooled_sd^2
+  first_term <- (all$expression / all$pooled_sd)^2 |>
+    aggregate(by = list(all$class), FUN = sum)
+  second_term <- (-2 * (user_data * all$expression / vv)) |>
+    aggregate(by = list(all$class), FUN = sum)
 
   priors <- unique(data.frame(class = all$class, prior = all$prior))
   priors$log_priors <- 2 * log(priors$prior)
-  dist <- aggregate(zs^2, by = list(all$class), FUN = sum)
-  merged <- merge(priors, dist, by.x = "class", by.y = "Group.1")
-  user_ids <- seq(from = 4, to = ncol(merged))
-  merged[, user_ids] <- sweep(
-    merged[, user_ids, drop = FALSE],
-    1,
-    merged$log_priors
-  )
-  merged
+
+  dists <- sweep(second_term[-1], 1, first_term[[2]], FUN = "+") |>
+    sweep(1, priors$log_priors)
+
+  classes <- factor(levels(priors$class), levels = levels(priors$class))
+
+  data.frame(class = classes, dists)
 }
 
 predict_class <- function(dists) {
-  dists[["class"]][apply(dists[4:ncol(dists)], 2, which.min)]
+  dists[["class"]][apply(dists[2:ncol(dists)], 2, which.min)]
 }
