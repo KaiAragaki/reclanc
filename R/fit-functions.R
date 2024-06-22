@@ -119,23 +119,15 @@ create_centroids <- function(selected, class_means, overall_means) {
   overall <- overall_means[match(selected$gene, names(overall_means))]
   mm <- matrix(rep(overall, n_levels))
 
-  new_means <- mapply(
-    \(m, x, y) m[x, y],
-    x = match(selected$class, lvls),
-    y = seq_len(n_levels),
-    MoreArgs = list(m = class)
-  )
+  update_col <- function(class_means, winner, overall_means) {
+    idx <- which(winner == lvls)
+    new <- rep(overall_means, length(class_means))
+    new[idx] <- class_means[idx]
+    new
+  }
 
-  row_idx <- seq_len(nrow(selected))
-  col_idx <- nrow(selected) * (match(selected$class, lvls) - 1)
-
-  # Making a 1D matrix and reshaping it was the only semi-feasible way I could
-  # think of updating a variety of values without using dependencies.
-  # Sorry my R-fu sucks!
-  mm[row_idx + col_idx] <- new_means
-  mm <- matrix(mm, nrow = nrow(selected), ncol = n_levels)
-
-  colnames(mm) <- lvls
-  rownames(mm) <- selected$gene
-  mm
+  out <- mapply(update_col, class, selected$class, overall)
+  out <- t(out)
+  colnames(out) <- lvls
+  out
 }
