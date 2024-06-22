@@ -35,6 +35,7 @@ clanc_fit <- function(expression, class_data, classes) {
   list(centroids = out)
 }
 
+#' @importFrom collapse %c*%
 calculate_pooled_sd <- function(expression, class_data, classes, class_means) {
   class_means <- as.matrix(class_means)
   df <- nrow(expression) - nrow(class_data)
@@ -53,6 +54,7 @@ calculate_pooled_sd <- function(expression, class_data, classes, class_means) {
   out
 }
 
+#' @importFrom collapse %c*% %r-% %r/%
 calculate_class_stats <- function(classes,
                                   class_means,
                                   overall_means,
