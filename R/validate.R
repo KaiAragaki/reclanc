@@ -108,6 +108,13 @@ process_active <- function(processed, active, priors, ...) {
   active
 }
 
-validate_factors <- function() {
+validate_classes <- function(processed, active, priors, ...) {
+  classes <- processed$outcomes$.outcome
 
+  if (!is.factor(classes)) cli::cli_abort("Classes must be a factor")
+
+  n_classes <- length(levels(classes))
+
+  if (n_classes == 1)
+    cli::cli_abort("Finding centroids with only one class doesn't make sense.")
 }
