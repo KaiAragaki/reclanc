@@ -103,7 +103,19 @@
 #' # TODO
 #'
 #' # SummarizedExperiment interface:
-#' # TODO
+#' se <- SummarizedExperiment::SummarizedExperiment(
+#'   expression_matrix,
+#'   colData = data.frame(
+#'     class = classes,
+#'     active = 5,
+#'     prior = c(0.5, 0.5)
+#'   )
+#' )
+#'
+#' clanc(se, classes = "class", active = "active", priors = "prior")
+#'
+#' # metadata can also be supplied as vectors
+#' clanc(se, classes = classes, active = 10, priors = "equal")
 #'
 #' # ExpressionSet interface:
 #' # TODO
@@ -162,27 +174,35 @@ clanc.SummarizedExperiment <- function(x,
   expression <- t(expression)
   cd_names <- colnames(SummarizedExperiment::colData(x))
 
-  if (length(classes) == 1 && is.character(classes)) {
-    if (!classes %in% cd_names) {
-      cli::cli_abort("{classes} is not a column name in {.code colData(x)}")
-    }
-    classes <- x[[classes]]
+
+  if (!spec_in_cd(classes, cd_names) &&
+        (spec_in_cd(priors, cd_names) || spec_in_cd(active, cd_names))) {
+    cli::cli_abort(
+      "`classes` must be specified as a column name in colData if `active` or `priors` are." #nolint
+    )
   }
 
-  if (length(active) == 1 && is.character(active)) {
-    if (!active %in% cd_names) {
-      cli::cli_abort("{active} is not a column name in {.code colData(x)}")
-    }
-    active <- x[[active]]
-  }
+  if (spec_in_cd(classes, cd_names))
+    metadata <- data.frame(class = x[[classes]])
 
-  if (all(length(priors) == 1,
-          is.character(priors),
-          !priors %in% c("equal", "class"))) {
-    if (!priors %in% cd_names) {
-      cli::cli_abort("{priors} is not a column name in {.code colData(x)}")
-    }
-    priors <- x[[priors]]
+  if (spec_in_cd(priors, cd_names))
+    metadata <- cbind(metadata, prior = x[[priors]])
+
+  if (spec_in_cd(active, cd_names))
+    metadata <- cbind(metadata, active = x[[active]])
+
+  if (spec_in_cd(classes, cd_names) &&
+        nrow(unique(metadata)) > length(unique(metadata$classes))) {
+    cli::cli_abort(
+      "More than one prior and/or active for each class",
+      "i" = "Each class must have exactly 1 prior and active",
+      "i" = "To test across many `active`, use `tune::tune_grid`"
+    )
+  } else {
+    metadata <- unique(metadata)
+    classes <- metadata$class
+    if (spec_in_cd(priors, cd_names)) priors <- metadata$priors
+    if (spec_in_cd(active, cd_names)) active <- metadata$active
   }
 
   processed <- hardhat::mold(expression, classes)
