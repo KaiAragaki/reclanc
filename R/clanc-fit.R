@@ -194,7 +194,34 @@ clanc.SummarizedExperiment <- function(x,
 #' @export
 #' @rdname clanc
 clanc.ExpressionSet <- function(x, classes, active, priors = "equal", ...) {
+  expression <- t(Biobase::exprs(x))
+  pd_names <- colnames(Biobase::pData(x))
 
+  if (length(classes) == 1 && is.character(classes)) {
+    if (!classes %in% pd_names) {
+      cli::cli_abort("{classes} is not a column name in {.code pData(x)}")
+    }
+    classes <- x[[classes]]
+  }
+
+  if (length(active) == 1 && is.character(active)) {
+    if (!active %in% pd_names) {
+      cli::cli_abort("{active} is not a column name in {.code pData(x)}")
+    }
+    active <- x[[active]]
+  }
+
+  if (all(length(priors) == 1,
+          is.character(priors),
+          !priors %in% c("equal", "class"))) {
+    if (!priors %in% pd_names) {
+      cli::cli_abort("{priors} is not a column name in {.code pData(x)}")
+    }
+    priors <- x[[priors]]
+  }
+
+  processed <- hardhat::mold(expression, classes)
+  clanc_bridge(processed, active, priors, ...)
 }
 
 # Formula method
