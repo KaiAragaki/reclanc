@@ -130,6 +130,7 @@ clanc.default <- function(x, ...) {
 #' @export
 #' @rdname clanc
 clanc.data.frame <- function(x, classes, active, priors, ...) {
+  x <- t(x)
   processed <- hardhat::mold(x, classes)
   clanc_bridge(processed, active, priors, ...)
 }
@@ -139,6 +140,7 @@ clanc.data.frame <- function(x, classes, active, priors, ...) {
 #' @export
 #' @rdname clanc
 clanc.matrix <- function(x, classes, active, priors, ...) {
+  x <- t(x)
   processed <- hardhat::mold(x, classes)
   clanc_bridge(processed, active, priors, ...)
 }
