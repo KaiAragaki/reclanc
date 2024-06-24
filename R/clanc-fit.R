@@ -125,7 +125,7 @@ clanc <- function(x, ...) {
 #' @export
 #' @rdname clanc
 clanc.default <- function(x, ...) {
-  stop("`clanc()` is not defined for a '", class(x)[1], "'.", call. = FALSE)
+  cli::cli_abort("`clanc()` is not defined for a {class(x)[1]}.")
 }
 
 # XY method - data frame
