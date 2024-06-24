@@ -158,7 +158,19 @@ clanc.SummarizedExperiment <- function(x,
                                        priors = "equal",
                                        assay = 1,
                                        ...) {
+  expression <- SummarizedExperiment::assay(x, assay)
+  expression <- t(expression)
+  cd_names <- colnames(SummarizedExperiment::colData(x))
 
+  if (length(classes) == 1 && is.character(classes)) {
+    if (!classes %in% cd_names) {
+      cli::cli_abort("{classes} is not a column name in {.code colData(x)}")
+    }
+    classes <- x[[classes]]
+  }
+
+  processed <- hardhat::mold(expression, classes)
+  clanc_bridge(processed, active, priors, ...)
 }
 
 # XY method - ExpressionSet
