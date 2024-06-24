@@ -170,10 +170,12 @@ clanc.SummarizedExperiment <- function(x,
                                        priors = "equal",
                                        assay = 1,
                                        ...) {
+  rlang::check_installed(
+    "SummarizedExperiment", reason = "to use `clanc.SummarizedExperiment()`"
+  )
   expression <- SummarizedExperiment::assay(x, assay)
   expression <- t(expression)
   cd_names <- colnames(SummarizedExperiment::colData(x))
-
 
   if (!spec_in_cd(classes, cd_names) &&
         (spec_in_cd(priors, cd_names) || spec_in_cd(active, cd_names))) {
@@ -214,6 +216,9 @@ clanc.SummarizedExperiment <- function(x,
 #' @export
 #' @rdname clanc
 clanc.ExpressionSet <- function(x, classes, active, priors = "equal", ...) {
+  rlang::check_installed(
+    "Biobase", reason = "to use `clanc.ExpressionSet()`"
+  )
   expression <- t(Biobase::exprs(x))
   pd_names <- colnames(Biobase::pData(x))
 
