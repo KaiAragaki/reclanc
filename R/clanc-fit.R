@@ -191,7 +191,7 @@ clanc.formula <- function(formula, data, active, priors = "equal", ...) {
 
 #' @export
 #' @rdname clanc
-clanc.recipe <- function(x, data, active, priors, ...) {
+clanc.recipe <- function(x, data, active, priors = "equal", ...) {
   processed <- hardhat::mold(x, data)
   clanc_bridge(processed, ...)
 }
