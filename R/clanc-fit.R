@@ -281,7 +281,7 @@ clanc.formula <- function(formula, data, active, priors = "equal", ...) {
   pred <- data[, which(colnames(data) %in% args$predictors)]
   outcomes <- data[, which(colnames(data) %in% args$outcomes)]
 
-  clanc.data.frame(pred, outcomes, active, priors, ...)
+  clanc.data.frame(t(pred), outcomes, active, priors, ...)
 }
 
 # Recipe method
