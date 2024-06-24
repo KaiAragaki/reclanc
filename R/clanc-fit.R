@@ -169,6 +169,22 @@ clanc.SummarizedExperiment <- function(x,
     classes <- x[[classes]]
   }
 
+  if (length(active) == 1 && is.character(active)) {
+    if (!active %in% cd_names) {
+      cli::cli_abort("{active} is not a column name in {.code colData(x)}")
+    }
+    active <- x[[active]]
+  }
+
+  if (all(length(priors) == 1,
+          is.character(priors),
+          !priors %in% c("equal", "class"))) {
+    if (!priors %in% cd_names) {
+      cli::cli_abort("{priors} is not a column name in {.code colData(x)}")
+    }
+    priors <- x[[priors]]
+  }
+
   processed <- hardhat::mold(expression, classes)
   clanc_bridge(processed, active, priors, ...)
 }
