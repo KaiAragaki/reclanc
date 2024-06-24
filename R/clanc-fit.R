@@ -129,7 +129,7 @@ clanc.default <- function(x, ...) {
 
 #' @export
 #' @rdname clanc
-clanc.data.frame <- function(x, classes, active, priors, ...) {
+clanc.data.frame <- function(x, classes, active, priors = "equal", ...) {
   x <- t(x)
   processed <- hardhat::mold(x, classes)
   clanc_bridge(processed, active, priors, ...)
@@ -139,7 +139,7 @@ clanc.data.frame <- function(x, classes, active, priors, ...) {
 
 #' @export
 #' @rdname clanc
-clanc.matrix <- function(x, classes, active, priors, ...) {
+clanc.matrix <- function(x, classes, active, priors = "equal", ...) {
   x <- t(x)
   processed <- hardhat::mold(x, classes)
   clanc_bridge(processed, active, priors, ...)
@@ -149,7 +149,12 @@ clanc.matrix <- function(x, classes, active, priors, ...) {
 
 #' @export
 #' @rdname clanc
-clanc.SummarizedExperiment <- function() {
+clanc.SummarizedExperiment <- function(x,
+                                       classes,
+                                       active,
+                                       priors = "equal",
+                                       assay = 1,
+                                       ...) {
 
 }
 
@@ -157,7 +162,7 @@ clanc.SummarizedExperiment <- function() {
 
 #' @export
 #' @rdname clanc
-clanc.ExpressionSet <- function() {
+clanc.ExpressionSet <- function(x, classes, active, priors = "equal", ...) {
 
 }
 
@@ -165,7 +170,7 @@ clanc.ExpressionSet <- function() {
 
 #' @export
 #' @rdname clanc
-clanc.formula <- function(formula, data, active, priors, ...) {
+clanc.formula <- function(formula, data, active, priors = "equal", ...) {
   # Oftentimes the formula will be incredibly wide.
   # R hates this.
   #
