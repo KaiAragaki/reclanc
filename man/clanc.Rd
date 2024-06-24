@@ -5,6 +5,8 @@
 \alias{clanc.default}
 \alias{clanc.data.frame}
 \alias{clanc.matrix}
+\alias{clanc.SummarizedExperiment}
+\alias{clanc.ExpressionSet}
 \alias{clanc.formula}
 \alias{clanc.recipe}
 \title{Calculate centroids from expression data with ClaNC}
@@ -16,6 +18,10 @@ clanc(x, ...)
 \method{clanc}{data.frame}(x, classes, active, priors, ...)
 
 \method{clanc}{matrix}(x, classes, active, priors, ...)
+
+\method{clanc}{SummarizedExperiment}()
+
+\method{clanc}{ExpressionSet}()
 
 \method{clanc}{formula}(formula, data, active, priors, ...)
 
@@ -107,7 +113,6 @@ the given gene across all classes.
 }
 \examples{
 
-
 expression_matrix <- synthetic_expression$expression
 head(expression_matrix)
 classes <- synthetic_expression$classes
@@ -117,21 +122,29 @@ classes
 
 clanc(expression_matrix, classes = classes, active = 5, priors = "equal")
 
+# Formula interface:
+
+# Data must have class included as a column
+# Genes must be *columns* and samples must be *rows*
+# Hence the data transposition.
+for_formula <- cbind(class = classes, t(expression_matrix))
+
+clanc(class ~ ., for_formula, active = 5, priors = "equal")
 
 
-predictors <- mtcars[, -1]
-outcome <- mtcars[, 1]
+# Recipes interface:
+# TODO
 
-# XY interface
-mod <- clanc(predictors, outcome)
+# SummarizedExperiment interface:
+# TODO
 
-# Formula interface
-mod2 <- clanc(mpg ~ ., mtcars)
+# ExpressionSet interface:
+# TODO
 
-# Recipes interface
-library(recipes)
-rec <- recipe(mpg ~ ., mtcars)
-rec <- step_log(rec, disp)
-mod3 <- clanc(rec, mtcars)
+# Different numbers of active genes per class:
+# TODO
+
+# Cross validation with `recipes`
+# TODO
 
 }

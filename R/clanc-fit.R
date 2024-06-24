@@ -78,20 +78,41 @@
 #' A `clanc` object.
 #'
 #' @examples
-#' predictors <- mtcars[, -1]
-#' outcome <- mtcars[, 1]
 #'
-#' # XY interface
-#' mod <- clanc(predictors, outcome)
+#' expression_matrix <- synthetic_expression$expression
+#' head(expression_matrix)
+#' classes <- synthetic_expression$classes
+#' classes
 #'
-#' # Formula interface
-#' mod2 <- clanc(mpg ~ ., mtcars)
+#' # data.frame/tibble/matrix interface:
 #'
-#' # Recipes interface
-#' library(recipes)
-#' rec <- recipe(mpg ~ ., mtcars)
-#' rec <- step_log(rec, disp)
-#' mod3 <- clanc(rec, mtcars)
+#' clanc(expression_matrix, classes = classes, active = 5, priors = "equal")
+#'
+#
+#' # Formula interface:
+#'
+#' # Data must have class included as a column
+#' # Genes must be *columns* and samples must be *rows*
+#' # Hence the data transposition.
+#' for_formula <- cbind(class = classes, t(expression_matrix))
+#'
+#' clanc(class ~ ., for_formula, active = 5, priors = "equal")
+#'
+#'
+#' # Recipes interface:
+#' # TODO
+#'
+#' # SummarizedExperiment interface:
+#' # TODO
+#'
+#' # ExpressionSet interface:
+#' # TODO
+#'
+#' # Different numbers of active genes per class:
+#' # TODO
+#'
+#' # Cross validation with `recipes`
+#' # TODO
 #'
 #' @export
 clanc <- function(x, ...) {
