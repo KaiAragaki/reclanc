@@ -193,8 +193,12 @@ clanc.recipe <- function(x, data, active, priors, ...) {
 
 clanc_bridge <- function(processed, active, priors, ...) {
   expression <- processed$predictors
-  classes <- processed$outcomes[[1]]
-  class_data <- data.frame(class = sort(unique(classes)), active = active, priors = priors)
+  classes <- processed$outcomes$.outcome
+  class_data <- data.frame(
+    class = sort(unique(classes)),
+    active = active,
+    priors = priors
+  )
   fit <- clanc_impl(expression, class_data, classes)
 
   new_clanc(
