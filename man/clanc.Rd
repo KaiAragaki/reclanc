@@ -127,13 +127,16 @@ clanc(expression_matrix, classes = classes, active = 5, priors = "equal")
 # Data must have class included as a column
 # Genes must be *columns* and samples must be *rows*
 # Hence the data transposition.
-for_formula <- cbind(class = classes, t(expression_matrix))
+for_formula <- data.frame(class = classes, t(expression_matrix))
 
 clanc(class ~ ., for_formula, active = 5, priors = "equal")
 
 
 # Recipes interface:
-# TODO
+
+rec <- recipes::recipe(class ~ ., data = for_formula)
+
+clanc(rec, for_formula, active = 5, priors = "equal")
 
 # SummarizedExperiment interface:
 se <- SummarizedExperiment::SummarizedExperiment(
@@ -141,7 +144,7 @@ se <- SummarizedExperiment::SummarizedExperiment(
   colData = data.frame(
     class = classes,
     active = 5,
-    priors = c(0.5, 0.5)
+    prior = c(0.5, 0.5)
   )
 )
 
@@ -157,7 +160,7 @@ adf <- data.frame(
 ) |>
   Biobase::AnnotatedDataFrame()
 
-es <- ExpressionSet(expression_matrix, adf)
+es <- Biobase::ExpressionSet(expression_matrix, adf)
 clanc(es, classes = "class", active = 5, priors = 0.5)
 
 # Different numbers of active genes per class:
