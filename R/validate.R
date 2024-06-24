@@ -72,49 +72,62 @@ validate_formula <- function(formula) {
   formula
 }
 
-validate_priors <- function(se, formula, priors) {
-  stopifnot(is.character(priors) || is.numeric(priors))
-  if (is.character(priors)) {
-    stopifnot(
-      length(priors) == 1,
-      priors %in% c("class", "equal")
-    )
-  }
 
-  dv <- get_var_info_from_form(se, fromula)
-  n_levels <- length(levels(dv$data))
+
+process_priors <- function(processed, active, priors, ...) {
+  stopifnot(is.character(priors) || is.numeric(priors))
+
+  n_levels <- length(levels(processed$outcomes$.outcome))
+
+  if (is.character(priors)) {
+    stopifnot(length(priors) == 1, priors %in% c("class", "equal"))
+    if (priors == "class") {
+      freqs <- as.numeric(table(processed$outcomes))
+      priors <- freqs / nrow(processed$outcomes)
+    }
+    if (priors == "equal") priors <- 1 / n_levels
+  }
 
   if (length(priors) == 1) priors <- rep(priors, times = n_levels)
-
-  if (is.numeric(priors)) {
-    stopifnot(
-      length(priors) == n_levels,
-      sum(priors) == 1,
-      all(priors >= 0)
-    )
+  if (length(priors) != n_levels) {
+    cli::cli_abort(c(
+      "Length of priors must be equal to 1 or number of unique class labels",
+      "i" = "Length of priors: {length(priors)}",
+      "i" = "Number of unique class labels: {n_levels}"
+    ))
   }
-
+  if (any(priors < 0)) {
+    cli::cli_abort("All priors must be positive")
+  }
+  if (sum(priors) > 1) {
+    cli::cli_abort("Sum of priors ({sum(priors)}) is greater than 1")
+  }
+  if (sum(priors) < 1) {
+    cli::cli_warn("Sum of priors ({sum(priors)}) is less than 1")
+  }
   priors
 }
 
-validate_active <- function(se, formula, active) {
+process_active <- function(processed, active, priors, ...) {
   stopifnot(is.numeric(active))
-  dv <- get_var_info_from_form(se, formula)
-  n_classes <- length(levels(dv$data))
 
-  if (!length(active) %in% c(1, n_classes)) {
-    cli::cli_abort(
-      "{.code length(active)} must equal # levels in {.var {dv$name}} or 1",
-      "i" = "{.code length(active)}: {.var {length(active)}}",
-      "i" = "Levels in {.var {dv$name}}: {.var {n_classes}}"
-    )
+  n_levels <- length(levels(processed$outcomes$.outcome))
+
+  if (length(active) == 1) active <- rep(active, n_levels)
+
+  if (length(active) != n_levels) {
+    cli::cli_abort(c(
+      "Length of `active` must be equal to 1 or number of unique class labels",
+      "i" = "Length of `active`: {length(active)}",
+      "i" = "Number of unique class labels: {n_levels}"
+    ))
   }
 
-  if (sum(active) > nrow(se)) {
+  if (sum(active) > ncol(processed$predictors)) {
     cli::cli_abort(
       "More active genes requested than exist in data",
-      "i" = "Active genes requested for all classes: {.var {sum(active)}}",
-      "i" = "Number in data: {.var {nrow(se)}}"
+      "i" = "Active genes requested for all classes: {sum(active)}",
+      "i" = "Number in data: {ncol(processed$predictors)}"
     )
   }
 
