@@ -23,3 +23,9 @@ You can install the development version of reclanc like so:
 # install.packages("pak")
 pak::pak("KaiAragaki/reclanc")
 ```
+
+## How it works
+
+You can find a more in-depth and statistically rigorous definition of
+how this algorithm works
+[here](https://doi.org/10.1093/bioinformatics/bti681).
