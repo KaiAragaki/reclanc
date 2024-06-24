@@ -51,7 +51,7 @@ validate_iv <- function(se, formula) {
 process_priors <- function(processed, active, priors, ...) {
   stopifnot(is.character(priors) || is.numeric(priors))
 
-  n_levels <- length(levels(processed$outcomes$.outcome))
+  n_levels <- length(levels(processed$outcomes[[1]]))
 
   if (is.character(priors)) {
     stopifnot(length(priors) == 1, priors %in% c("class", "equal"))
@@ -85,7 +85,7 @@ process_priors <- function(processed, active, priors, ...) {
 process_active <- function(processed, active, priors, ...) {
   stopifnot(is.numeric(active))
 
-  n_levels <- length(levels(processed$outcomes$.outcome))
+  n_levels <- length(levels(processed$outcomes[[1]]))
 
   if (length(active) == 1) active <- rep(active, n_levels)
 
@@ -109,7 +109,7 @@ process_active <- function(processed, active, priors, ...) {
 }
 
 validate_classes <- function(processed, active, priors, ...) {
-  classes <- processed$outcomes$.outcome
+  classes <- processed$outcomes[[1]]
 
   if (!is.factor(classes)) cli::cli_abort("Classes must be a factor")
 

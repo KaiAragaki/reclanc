@@ -100,7 +100,10 @@
 #'
 #'
 #' # Recipes interface:
-#' # TODO
+#'
+#' rec <- recipes::recipe(class ~ ., data = for_formula)
+#'
+#' clanc(rec, for_formula, active = 5, priors = "equal")
 #'
 #' # SummarizedExperiment interface:
 #' se <- SummarizedExperiment::SummarizedExperiment(
@@ -300,7 +303,8 @@ clanc_bridge <- function(processed, active, priors, ...) {
   validate_classes(processed, active, priors)
 
   expression <- processed$predictors
-  classes <- processed$outcomes$.outcome
+  # hardhat 'mold' returns diff colnames for recipe and all others
+  classes <- processed$outcomes[[1]]
   class_data <- data.frame(
     class = sort(unique(classes)),
     active = active,
