@@ -192,6 +192,10 @@ clanc.recipe <- function(x, data, active, priors, ...) {
 # Bridge
 
 clanc_bridge <- function(processed, active, priors, ...) {
+
+  priors <- process_priors(processed, active, priors, ...)
+  active <- process_active(processed, active, priors, ...)
+
   expression <- processed$predictors
   classes <- processed$outcomes$.outcome
   class_data <- data.frame(
