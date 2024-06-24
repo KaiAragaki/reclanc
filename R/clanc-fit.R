@@ -118,7 +118,15 @@
 #' clanc(se, classes = classes, active = 10, priors = "equal")
 #'
 #' # ExpressionSet interface:
-#' # TODO
+#' adf <- data.frame(
+#'   row.names = colnames(expression_matrix),
+#'   class = classes
+#' ) |>
+#'   Biobase::AnnotatedDataFrame()
+#'
+#' es <- ExpressionSet(expression_matrix, adf)
+#
+#' clanc(es, classes = "class", active = 5, priors = 0.5)
 #'
 #' # Different numbers of active genes per class:
 #' # TODO
@@ -222,27 +230,33 @@ clanc.ExpressionSet <- function(x, classes, active, priors = "equal", ...) {
   expression <- t(Biobase::exprs(x))
   pd_names <- colnames(Biobase::pData(x))
 
-  if (length(classes) == 1 && is.character(classes)) {
-    if (!classes %in% pd_names) {
-      cli::cli_abort("{classes} is not a column name in {.code pData(x)}")
-    }
+  if (!spec_in_cd(classes, pd_names) &&
+        (spec_in_cd(priors, pd_names) || spec_in_cd(active, pd_names))) {
+    cli::cli_abort(
+      "`classes` must be specified as a column name in pData if `active` or `priors` are." #nolint
+    )
+  }
+  if (spec_in_cd(classes, pd_names))
+    metadata <- data.frame(class = x[[classes]])
+
+  if (spec_in_cd(priors, pd_names))
+    metadata <- cbind(metadata, prior = x[[priors]])
+
+  if (spec_in_cd(active, pd_names))
+    metadata <- cbind(metadata, active = x[[active]])
+
+  if (spec_in_cd(classes, pd_names) &&
+        nrow(unique(metadata)) > length(unique(metadata$class))) {
+    cli::cli_abort(
+      "More than one prior and/or active for each class",
+      "i" = "Each class must have exactly 1 prior and active",
+      "i" = "To test across many `active`, use `tune::tune_grid`"
+    )
+  } else {
+    metadata <- unique(metadata)
     classes <- x[[classes]]
-  }
-
-  if (length(active) == 1 && is.character(active)) {
-    if (!active %in% pd_names) {
-      cli::cli_abort("{active} is not a column name in {.code pData(x)}")
-    }
-    active <- x[[active]]
-  }
-
-  if (all(length(priors) == 1,
-          is.character(priors),
-          !priors %in% c("equal", "class"))) {
-    if (!priors %in% pd_names) {
-      cli::cli_abort("{priors} is not a column name in {.code pData(x)}")
-    }
-    priors <- x[[priors]]
+    if (spec_in_cd(priors, pd_names)) priors <- metadata$priors
+    if (spec_in_cd(active, pd_names)) active <- metadata$active
   }
 
   processed <- hardhat::mold(expression, classes)

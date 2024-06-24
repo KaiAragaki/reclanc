@@ -151,7 +151,14 @@ clanc(se, classes = "class", active = "active", priors = "prior")
 clanc(se, classes = classes, active = 10, priors = "equal")
 
 # ExpressionSet interface:
-# TODO
+adf <- data.frame(
+  row.names = colnames(expression_matrix),
+  class = classes
+) |>
+  Biobase::AnnotatedDataFrame()
+
+es <- ExpressionSet(expression_matrix, adf)
+clanc(es, classes = "class", active = 5, priors = 0.5)
 
 # Different numbers of active genes per class:
 # TODO
