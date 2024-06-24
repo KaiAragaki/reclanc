@@ -94,7 +94,7 @@
 #' # Data must have class included as a column
 #' # Genes must be *columns* and samples must be *rows*
 #' # Hence the data transposition.
-#' for_formula <- cbind(class = classes, t(expression_matrix))
+#' for_formula <- data.frame(class = classes, t(expression_matrix))
 #'
 #' clanc(class ~ ., for_formula, active = 5, priors = "equal")
 #'
