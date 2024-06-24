@@ -1,29 +1,77 @@
-#' Fit a `clanc`
-#'
-#' `clanc()` fits a model.
+#' Calculate centroids from expression data with ClaNC
 #'
 #' @param x Depending on the context:
 #'
-#'   * A __data frame__ of predictors.
-#'   * A __matrix__ of predictors.
+#'   * A __data frame__ of expression.
+#'   * A __matrix__ of expression.
 #'   * A __recipe__ specifying a set of preprocessing steps
 #'     created from [recipes::recipe()].
+#'   * An __ExpressionSet__.
+#'   * A __SummarizedExperiment__ with `assay` containing expression.
 #'
-#' @param y When `x` is a __data frame__ or __matrix__, `y` is the outcome
-#' specified as:
+#' Expression should be library-size corrected, but not scaled.
 #'
-#'   * A __data frame__ with 1 numeric column.
-#'   * A __matrix__ with 1 numeric column.
-#'   * A numeric __vector__.
+#' If supplying a __data frame__, __matrix__, __ExpressionSet__,
+#' __SummarizedExperiment__, the rows should represent genes, and the columns
+#' should represent samples (as is standard for expression data). The column
+#' names should be sample IDs, while the row names should be gene IDs.
+#'
+#' If a __recipe__ is provided, the data should have genes as
+#' columns (to match the formula provided to the recipe.)
+#'
+#' @param class When `x` is a __data frame__ or __matrix__, `class` contains
+#'   class labels with the form of either:
+#'
+#'   * A __data frame__ with 1 factor column
+#'   * A factor __vector__.
+#'
+#' When `x` is an __ExpressionSet__ or __SummarizedExperiment__, `class` is the
+#' name of the column in `pData(x)` or `colData(x)` that contains classes as a
+#' factor.
 #'
 #' @param data When a __recipe__ or __formula__ is used, `data` is specified as:
 #'
-#'   * A __data frame__ containing both the predictors and the outcome.
+#'   * A __data frame__ containing both expression and classes, where columns
+#'   are the genes or class, and rows are the samples.
 #'
-#' @param formula A formula specifying the outcome terms on the left-hand side,
+#' @param assay When a __SummarizedExperiment__ is used, the index or name of
+#'   the assay
+#'
+#' @param formula A formula specifying the classes on the left-hand side,
 #' and the predictor terms on the right-hand side.
 #'
+#' @param active Either a single number or a numeric vector equal to the length
+#'   of the number of unique class labels. Represents the number class-specific
+#'   genes that should be selected for a centroid. Note that different numbers
+#'   of genes can be selected for each class. See details.
+#'
+#' When `x` is an __ExpressionSet__ or __SummarizedExperiment__, `active` can
+#' additionally by the name of the column in `pData(x)` or `colData(x)` that
+#' contains the numeric vector
+#'
+#' @param priors Can take a variety of values:
+#'
+#'   * "equal" - each class has an equal prior
+#'   * "class" - each class has a prior equal to its frequency in the training
+#'   set
+#'   * A numeric vector with length equal to number of classes
+#'
+#' When `x` is an __ExpressionSet__ or __SummarizedExperiment__, `active` can
+#' additionally by the name of the column in `pData(x)` or `colData(x)` that
+#' contains the numeric vector
+#'
 #' @param ... Not currently used, but required for extensibility.
+#'
+#' @details The original description of ClaNC can be found
+#'   [here](10.1093/bioinformatics/bti681)
+#'
+#' While `active` sets the number of class-specific genes, each centroid will
+#' have more than that number of genes. To explain by way of example, if `active
+#' = 5` and there are 3 classes, each centroid will have 15 genes, with 5 of
+#' those genes being particular to a given class. If these genes are 'active' in
+#' that class, their values will be the mean of the class. If the genes are not
+#' active in that given class, their values will be the overall expression of
+#' the given gene across all classes.
 #'
 #' @return
 #'
@@ -74,6 +122,22 @@ clanc.matrix <- function(x, y, active, priors, ...) {
   clanc_bridge(processed, active, priors, ...)
 }
 
+# XY method - SummarizedExperiment
+
+#' @export
+#' @rdname clanc
+clanc.SummarizedExperiment <- function() {
+
+}
+
+# XY method - ExpressionSet
+
+#' @export
+#' @rdname clanc
+clanc.ExpressionSet <- function() {
+
+}
+
 # Formula method
 
 #' @export
@@ -116,22 +180,10 @@ clanc_bridge <- function(processed, active, priors, ...) {
   )
 }
 
-
 # ------------------------------------------------------------------------------
 # Implementation
 
-
-# Expression - ***sample*gene*** matrix with names for each
-#
-# Classes + Active + Prior - data.frame
-#
-# Class to sample map - data.frame.
-# colnames(class_sample_map) == c("sample", "class")
-# Assumed to be arranged in the same order as expression rows
-#
 clanc_impl <- function(expression, class_data, classes) {
   fit <- clanc_fit(expression, class_data, classes)
   list(centroids = fit$centroids)
 }
-
-# TODO Allow things like "class" and "equal" to be provided to prior
