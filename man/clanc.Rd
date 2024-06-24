@@ -15,17 +15,17 @@ clanc(x, ...)
 
 \method{clanc}{default}(x, ...)
 
-\method{clanc}{data.frame}(x, classes, active, priors, ...)
+\method{clanc}{data.frame}(x, classes, active, priors = "equal", ...)
 
-\method{clanc}{matrix}(x, classes, active, priors, ...)
+\method{clanc}{matrix}(x, classes, active, priors = "equal", ...)
 
-\method{clanc}{SummarizedExperiment}()
+\method{clanc}{SummarizedExperiment}(x, classes, active, priors = "equal", assay = 1, ...)
 
-\method{clanc}{ExpressionSet}()
+\method{clanc}{ExpressionSet}(x, classes, active, priors = "equal", ...)
 
-\method{clanc}{formula}(formula, data, active, priors, ...)
+\method{clanc}{formula}(formula, data, active, priors = "equal", ...)
 
-\method{clanc}{recipe}(x, data, active, priors, ...)
+\method{clanc}{recipe}(x, data, active, priors = "equal", ...)
 }
 \arguments{
 \item{x}{Depending on the context:
@@ -82,6 +82,9 @@ When \code{x} is an \strong{ExpressionSet} or \strong{SummarizedExperiment}, \co
 additionally by the name of the column in \code{pData(x)} or \code{colData(x)} that
 contains the numeric vector}
 
+\item{assay}{When a \strong{SummarizedExperiment} is used, the index or name of
+the assay}
+
 \item{formula}{A formula specifying the classes on the left-hand side,
 and the predictor terms on the right-hand side.}
 
@@ -90,9 +93,6 @@ and the predictor terms on the right-hand side.}
 \item A \strong{data frame} containing both expression and classes, where columns
 are the genes or class, and rows are the samples.
 }}
-
-\item{assay}{When a \strong{SummarizedExperiment} is used, the index or name of
-the assay}
 }
 \value{
 A \code{clanc} object.
@@ -136,7 +136,19 @@ clanc(class ~ ., for_formula, active = 5, priors = "equal")
 # TODO
 
 # SummarizedExperiment interface:
-# TODO
+se <- SummarizedExperiment::SummarizedExperiment(
+  expression_matrix,
+  colData = data.frame(
+    class = classes,
+    active = 5,
+    priors = c(0.5, 0.5)
+  )
+)
+
+clanc(se, classes = "class", active = "active", priors = "prior")
+
+# metadata can also be supplied as vectors
+clanc(se, classes = classes, active = 10, priors = "equal")
 
 # ExpressionSet interface:
 # TODO
@@ -145,6 +157,9 @@ clanc(class ~ ., for_formula, active = 5, priors = "equal")
 # TODO
 
 # Cross validation with `recipes`
+# TODO
+
+# Using `tune` to find optimal `active`
 # TODO
 
 }
