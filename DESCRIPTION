@@ -39,3 +39,4 @@ Imports:
     hardhat,
     rlang,
     stats
+LazyData: true
