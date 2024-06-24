@@ -7,7 +7,7 @@
 \alias{clanc.matrix}
 \alias{clanc.formula}
 \alias{clanc.recipe}
-\title{Calculate centroids from expression data using the ClaNC algorithm}
+\title{Calculate centroids from expression data with ClaNC}
 \usage{
 clanc(x, ...)
 
@@ -34,7 +34,7 @@ created from \code{\link[recipes:recipe]{recipes::recipe()}}.
 
 Expression should be library-size corrected, but not scaled.
 
-If supplying a \strong{data frame}, \emph{matrix}_, \strong{ExpressionSet},
+If supplying a \strong{data frame}, \strong{matrix}, \strong{ExpressionSet},
 \strong{SummarizedExperiment}, the rows should represent genes, and the columns
 should represent samples (as is standard for expression data). The column
 names should be sample IDs, while the row names should be gene IDs.
@@ -43,6 +43,17 @@ If a \strong{recipe} is provided, the data should have genes as
 columns (to match the formula provided to the recipe.)}
 
 \item{...}{Not currently used, but required for extensibility.}
+
+\item{classes}{When \code{x} is a \strong{data frame} or \strong{matrix}, \code{class} contains
+class labels with the form of either:
+\itemize{
+\item A \strong{data frame} with 1 factor column
+\item A factor \strong{vector}.
+}
+
+When \code{x} is an \strong{ExpressionSet} or \strong{SummarizedExperiment}, \code{class} is the
+name of the column in \code{pData(x)} or \code{colData(x)} that contains classes as a
+factor.}
 
 \item{active}{Either a single number or a numeric vector equal to the length
 of the number of unique class labels. Represents the number class-specific
@@ -74,17 +85,6 @@ and the predictor terms on the right-hand side.}
 are the genes or class, and rows are the samples.
 }}
 
-\item{class}{When \code{x} is a \strong{data frame} or \strong{matrix}, \code{class} contains
-class labels with the form of either:
-\itemize{
-\item A \strong{data frame} with 1 factor column
-\item A factor \strong{vector}.
-}
-
-When \code{x} is an \strong{ExpressionSet} or \strong{SummarizedExperiment}, \code{class} is the
-name of the column in \code{pData(x)} or \code{colData(x)} that contains classes as a
-factor.}
-
 \item{assay}{When a \strong{SummarizedExperiment} is used, the index or name of
 the assay}
 }
@@ -92,7 +92,7 @@ the assay}
 A \code{clanc} object.
 }
 \description{
-Calculate centroids from expression data using the ClaNC algorithm
+Calculate centroids from expression data with ClaNC
 }
 \details{
 The original description of ClaNC can be found
@@ -106,6 +106,19 @@ active in that given class, their values will be the overall expression of
 the given gene across all classes.
 }
 \examples{
+
+
+expression_matrix <- synthetic_expression$expression
+head(expression_matrix)
+classes <- synthetic_expression$classes
+classes
+
+# data.frame/tibble/matrix interface:
+
+clanc(expression_matrix, classes = classes, active = 5, priors = "equal")
+
+
+
 predictors <- mtcars[, -1]
 outcome <- mtcars[, 1]
 
