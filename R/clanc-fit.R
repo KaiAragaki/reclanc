@@ -127,7 +127,7 @@
 #' ) |>
 #'   Biobase::AnnotatedDataFrame()
 #'
-#' es <- ExpressionSet(expression_matrix, adf)
+#' es <- Biobase::ExpressionSet(expression_matrix, adf)
 #
 #' clanc(es, classes = "class", active = 5, priors = 0.5)
 #'
