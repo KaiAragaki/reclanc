@@ -114,6 +114,9 @@
 #' # Cross validation with `recipes`
 #' # TODO
 #'
+#' # Using `tune` to find optimal `active`
+#' # TODO
+#'
 #' @export
 clanc <- function(x, ...) {
   UseMethod("clanc")
