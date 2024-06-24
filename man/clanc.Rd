@@ -13,9 +13,9 @@ clanc(x, ...)
 
 \method{clanc}{default}(x, ...)
 
-\method{clanc}{data.frame}(x, y, active, priors, ...)
+\method{clanc}{data.frame}(x, classes, active, priors, ...)
 
-\method{clanc}{matrix}(x, y, active, priors, ...)
+\method{clanc}{matrix}(x, classes, active, priors, ...)
 
 \method{clanc}{formula}(formula, data, active, priors, ...)
 

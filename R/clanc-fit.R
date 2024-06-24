@@ -19,7 +19,7 @@
 #' If a __recipe__ is provided, the data should have genes as
 #' columns (to match the formula provided to the recipe.)
 #'
-#' @param class When `x` is a __data frame__ or __matrix__, `class` contains
+#' @param classes When `x` is a __data frame__ or __matrix__, `class` contains
 #'   class labels with the form of either:
 #'
 #'   * A __data frame__ with 1 factor column
@@ -108,8 +108,8 @@ clanc.default <- function(x, ...) {
 
 #' @export
 #' @rdname clanc
-clanc.data.frame <- function(x, y, active, priors, ...) {
-  processed <- hardhat::mold(x, y)
+clanc.data.frame <- function(x, classes, active, priors, ...) {
+  processed <- hardhat::mold(x, classes)
   clanc_bridge(processed, active, priors, ...)
 }
 
@@ -117,8 +117,8 @@ clanc.data.frame <- function(x, y, active, priors, ...) {
 
 #' @export
 #' @rdname clanc
-clanc.matrix <- function(x, y, active, priors, ...) {
-  processed <- hardhat::mold(x, y)
+clanc.matrix <- function(x, classes, active, priors, ...) {
+  processed <- hardhat::mold(x, classes)
   clanc_bridge(processed, active, priors, ...)
 }
 
