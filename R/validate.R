@@ -1,17 +1,3 @@
-# Input validation
-validate_summarized_experiment <- function() {
-
-}
-
-
-validate_se <- function(se, formula, priors, active) {
-  stopifnot(inherits(se, "SummarizedExperiment"))
-
-  se <- validate_dv(se, formula, priors, active)
-  se <- validate_iv(se, formula, priors, active)
-  se
-}
-
 validate_dv <- function(se, formula, priors, active) {
   dv <- get_var_info_from_form(se, formula, 1)
 
@@ -61,18 +47,6 @@ validate_iv <- function(se, formula) {
 
   se
 }
-
-validate_formula <- function(formula) {
-  stopifnot(inherits(formula, "formula"))
-  if (length(all.vars(formula)) != 2) {
-    cli::cli_abort(
-      "formula must contain exactly one independent and one dependent variable"
-    )
-  }
-  formula
-}
-
-
 
 process_priors <- function(processed, active, priors, ...) {
   stopifnot(is.character(priors) || is.numeric(priors))
@@ -132,4 +106,8 @@ process_active <- function(processed, active, priors, ...) {
   }
 
   active
+}
+
+validate_factors <- function() {
+
 }
