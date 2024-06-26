@@ -198,7 +198,7 @@ clanc.SummarizedExperiment <- function(x,
   if (spec_in_cd(classes, cd_names))
     metadata <- data.frame(class = x[[classes]])
 
-  if (spec_in_cd(priors, cd_names))
+  if ((!priors %in% c("equal", "class")) && spec_in_cd(priors, cd_names))
     metadata <- cbind(metadata, prior = x[[priors]])
 
   if (spec_in_cd(active, cd_names))
@@ -214,7 +214,9 @@ clanc.SummarizedExperiment <- function(x,
   } else {
     metadata <- unique(metadata)
     classes <- metadata$class
-    if (spec_in_cd(priors, cd_names)) priors <- metadata$priors
+    if ((!priors %in% c("equal", "class")) && spec_in_cd(priors, cd_names)) {
+      priors <- metadata$priors
+    }
     if (spec_in_cd(active, cd_names)) active <- metadata$active
   }
 
@@ -242,7 +244,7 @@ clanc.ExpressionSet <- function(x, classes, active, priors = "equal", ...) {
   if (spec_in_cd(classes, pd_names))
     metadata <- data.frame(class = x[[classes]])
 
-  if (spec_in_cd(priors, pd_names))
+  if ((!priors %in% c("equal", "class")) && spec_in_cd(priors, pd_names))
     metadata <- cbind(metadata, prior = x[[priors]])
 
   if (spec_in_cd(active, pd_names))
@@ -258,7 +260,9 @@ clanc.ExpressionSet <- function(x, classes, active, priors = "equal", ...) {
   } else {
     metadata <- unique(metadata)
     classes <- x[[classes]]
-    if (spec_in_cd(priors, pd_names)) priors <- metadata$priors
+    if ((!priors %in% c("equal", "class")) && spec_in_cd(priors, pd_names)) {
+      priors <- metadata$priors
+    }
     if (spec_in_cd(active, pd_names)) active <- metadata$active
   }
 
