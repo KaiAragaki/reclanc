@@ -26,6 +26,28 @@ calc_dist <- function(all) {
   data.frame(class = classes, dists)
 }
 
+calc_cors <- function(all, method) {
+  splits <- split(all, ~class)
+  do.call(
+    hardhat::spruce_numeric_multiple,
+    lapply(splits, calc_cor, method = method)
+  )
+}
+
+calc_cor <- function(split, method) {
+  cor <- stats::cor(split$expression, split[7:ncol(split)], method = method)
+  rownames(cor) <- unique(split$class)
+  as.numeric(cor)
+}
+
 predict_class <- function(dists) {
   dists[["class"]][apply(dists[2:ncol(dists)], 2, which.min)]
 }
+
+predict_dist_multi <- function(dists) {
+  rownames(dists) <- dists$class
+  dists <- dists[-1]
+  do.call(hardhat::spruce_numeric_multiple, as.list(data.frame(t(dists))))
+}
+
+# dists: col = sample, row = class, value = dist

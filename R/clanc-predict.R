@@ -9,6 +9,8 @@
 #'
 #' - `"numeric"` for numeric predictions.
 #'
+#' @param method If `type` is `numeric`, the method of correlation
+#'
 #' @param ... Not used, but required for extensibility.
 #'
 #' @return
@@ -30,7 +32,7 @@
 predict.clanc <- function(object, new_data, type, ...) {
   forged <- hardhat::forge(new_data, object$blueprint)
   rlang::arg_match(type, valid_clanc_predict_types())
-  predict_clanc_bridge(type, object, forged$predictors)
+  predict_clanc_bridge(type, object, forged$predictors, ...)
 }
 
 valid_clanc_predict_types <- function() {
@@ -40,11 +42,11 @@ valid_clanc_predict_types <- function() {
 # ------------------------------------------------------------------------------
 # Bridge
 
-predict_clanc_bridge <- function(type, model, predictors) {
+predict_clanc_bridge <- function(type, model, predictors, ...) {
   predictors <- t(predictors)
 
   predict_function <- get_clanc_predict_function(type)
-  predictions <- predict_function(model, predictors)
+  predictions <- predict_function(model, predictors, ...)
   hardhat::validate_prediction_size(predictions, t(predictors))
 
   predictions
@@ -61,15 +63,14 @@ get_clanc_predict_function <- function(type) {
 # ------------------------------------------------------------------------------
 # Implementation
 
-predict_clanc_class <- function(model, predictors) {
+predict_clanc_class <- function(model, predictors, ...) {
   filter_predictors(model, predictors) |>
     calc_dist() |>
     predict_class() |>
     hardhat::spruce_class()
 }
 
-predict_clanc_numeric <- function(model, predictors) {
-
-  predictions <- rep(1L, times = nrow(predictors))
-  hardhat::spruce_numeric(predictions)
+predict_clanc_numeric <- function(model, predictors, method, ...) {
+  filter_predictors(model, predictors) |>
+    calc_cors(method)
 }
