@@ -68,7 +68,7 @@ predict_clanc_class <- function(model, predictors) {
     hardhat::spruce_class()
 }
 
-predict_clanc_prob <- function(model, predictors) {
+predict_clanc_numeric <- function(model, predictors) {
 
   predictions <- rep(1L, times = nrow(predictors))
   hardhat::spruce_numeric(predictions)
