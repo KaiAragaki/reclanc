@@ -77,6 +77,25 @@
 can work with:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">synthetic_expression</span>, <span class="va">head</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; $expression</span></span>
+<span><span class="co">#&gt;        sample1  sample2  sample3  sample4  sample5  sample6  sample7  sample8</span></span>
+<span><span class="co">#&gt; gene1 8.097529 7.119188 7.304400 7.554689 7.953206 7.714925 7.512700 8.597547</span></span>
+<span><span class="co">#&gt; gene2 8.641837 9.400416 8.500865 8.878687 8.318438 8.728683 7.812591 7.638167</span></span>
+<span><span class="co">#&gt; gene3 3.436236 4.317915 3.435193 3.515755 3.024976 4.762209 5.048956 2.006646</span></span>
+<span><span class="co">#&gt; gene4 4.368008 5.212750 4.618249 4.201365 3.195294 4.707750 5.126769 6.178658</span></span>
+<span><span class="co">#&gt; gene5 2.423974 3.563816 4.062362 2.163278 2.021435 2.813873 0.000000 4.652358</span></span>
+<span><span class="co">#&gt; gene6 5.371205 5.919809 4.366915 4.805534 4.834856 5.622157 3.883531 3.593082</span></span>
+<span><span class="co">#&gt;        sample9 sample10 sample11 sample12</span></span>
+<span><span class="co">#&gt; gene1 6.475641 7.648858 8.637526 7.345038</span></span>
+<span><span class="co">#&gt; gene2 8.110285 7.906104 7.424728 7.927039</span></span>
+<span><span class="co">#&gt; gene3 2.739211 3.111668 3.161077 4.306611</span></span>
+<span><span class="co">#&gt; gene4 5.170265 4.259578 5.872855 6.159023</span></span>
+<span><span class="co">#&gt; gene5 1.532242 3.399823 3.691250 1.932937</span></span>
+<span><span class="co">#&gt; gene6 4.246205 4.637316 3.575837 2.730452</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $classes</span></span>
+<span><span class="co">#&gt; [1] A A A A A A</span></span>
+<span><span class="co">#&gt; Levels: A B</span></span></code></pre>
 <p>These data include 10 samples, 5 of class “A” and 5 of class “B”,
 with 100 genes.</p>
 <p><code>reclanc</code> is able to ingest a variety of common formats
@@ -97,14 +116,44 @@ columns, together, in a single <code>data.frame</code>.</p>
 <div class="section level4">
 <h4 id="formula">Formula<a class="anchor" aria-label="anchor" href="#formula"></a>
 </h4>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">form_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span></span>
 <span>  class <span class="op">=</span> <span class="va">synthetic_expression</span><span class="op">$</span><span class="va">classes</span>,</span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">synthetic_expression</span><span class="op">$</span><span class="va">expression</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">form_data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/clanc.html">clanc</a></span><span class="op">(</span><span class="va">class</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">form_data</span>, active <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt;         class    gene1    gene2    gene3    gene4</span></span>
+<span><span class="co">#&gt; sample1     A 8.097529 8.641837 3.436236 4.368008</span></span>
+<span><span class="co">#&gt; sample2     A 7.119188 9.400416 4.317915 5.212750</span></span>
+<span><span class="co">#&gt; sample3     A 7.304400 8.500865 3.435193 4.618249</span></span>
+<span><span class="co">#&gt; sample4     A 7.554689 8.878687 3.515755 4.201365</span></span>
+<span><span class="co">#&gt; sample5     A 7.953206 8.318438 3.024976 3.195294</span></span>
+<span><span class="co">#&gt; sample6     A 7.714925 8.728683 4.762209 4.707750</span></span></code></pre>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/clanc.html">clanc</a></span><span class="op">(</span><span class="va">class</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">form_data</span>, active <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; &lt;clanc&gt; </span></span>
+<span><span class="co">#&gt; $centroids</span></span>
+<span><span class="co">#&gt;    class   gene expression pooled_sd active prior</span></span>
+<span><span class="co">#&gt; 1      A gene12   7.514718 0.4779155      5   0.5</span></span>
+<span><span class="co">#&gt; 2      A  gene2   8.744821 0.3147537      5   0.5</span></span>
+<span><span class="co">#&gt; 3      A gene13   8.936462 0.3418472      5   0.5</span></span>
+<span><span class="co">#&gt; 4      A gene21   6.584681 0.5279636      5   0.5</span></span>
+<span><span class="co">#&gt; 5      A gene24   4.307301 0.7214700      5   0.5</span></span>
+<span><span class="co">#&gt; 6      A gene74   4.028507 0.4940783      5   0.5</span></span>
+<span><span class="co">#&gt; 7      A gene41   4.328516 0.6317005      5   0.5</span></span>
+<span><span class="co">#&gt; 8      A gene95   6.873184 0.4462475      5   0.5</span></span>
+<span><span class="co">#&gt; 9      A gene52   3.743798 0.5173769      5   0.5</span></span>
+<span><span class="co">#&gt; 10     A gene66   7.008174 0.5883218      5   0.5</span></span>
+<span><span class="co">#&gt; 11     B gene12   8.072284 0.4779155      5   0.5</span></span>
+<span><span class="co">#&gt; 12     B gene13   9.938137 0.3418472      5   0.5</span></span>
+<span><span class="co">#&gt; 13     B  gene2   8.273987 0.3147537      5   0.5</span></span>
+<span><span class="co">#&gt; 14     B gene24   3.370467 0.7214700      5   0.5</span></span>
+<span><span class="co">#&gt; 15     B gene21   5.789423 0.5279636      5   0.5</span></span>
+<span><span class="co">#&gt; 16     B gene41   5.518354 0.6317005      5   0.5</span></span>
+<span><span class="co">#&gt; 17     B gene74   3.226598 0.4940783      5   0.5</span></span>
+<span><span class="co">#&gt; 18     B gene52   2.438579 0.5173769      5   0.5</span></span>
+<span><span class="co">#&gt; 19     B gene95   6.288173 0.4462475      5   0.5</span></span>
+<span><span class="co">#&gt; 20     B gene66   7.891588 0.5883218      5   0.5</span></span></code></pre>
 </div>
 <div class="section level4">
 <h4 id="recipe">
@@ -112,10 +161,35 @@ columns, together, in a single <code>data.frame</code>.</p>
 </h4>
 <p><code>reclanc</code> also supports <code>tidymodels</code>
 workflows:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/discrim_linear.html" class="external-link">discrim_linear</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_engine.html" class="external-link">set_engine</a></span><span class="op">(</span><span class="st">"clanc"</span>, active <span class="op">=</span> <span class="fl">20</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_engine.html" class="external-link">set_engine</a></span><span class="op">(</span><span class="st">"clanc"</span>, active <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">class</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">form_data</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; parsnip model object</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; &lt;clanc&gt; </span></span>
+<span><span class="co">#&gt; $centroids</span></span>
+<span><span class="co">#&gt;    class   gene expression pooled_sd active prior</span></span>
+<span><span class="co">#&gt; 1      A gene12   7.514718 0.4779155      5   0.5</span></span>
+<span><span class="co">#&gt; 2      A  gene2   8.744821 0.3147537      5   0.5</span></span>
+<span><span class="co">#&gt; 3      A gene13   8.936462 0.3418472      5   0.5</span></span>
+<span><span class="co">#&gt; 4      A gene21   6.584681 0.5279636      5   0.5</span></span>
+<span><span class="co">#&gt; 5      A gene24   4.307301 0.7214700      5   0.5</span></span>
+<span><span class="co">#&gt; 6      A gene74   4.028507 0.4940783      5   0.5</span></span>
+<span><span class="co">#&gt; 7      A gene41   4.328516 0.6317005      5   0.5</span></span>
+<span><span class="co">#&gt; 8      A gene95   6.873184 0.4462475      5   0.5</span></span>
+<span><span class="co">#&gt; 9      A gene52   3.743798 0.5173769      5   0.5</span></span>
+<span><span class="co">#&gt; 10     A gene66   7.008174 0.5883218      5   0.5</span></span>
+<span><span class="co">#&gt; 11     B gene12   8.072284 0.4779155      5   0.5</span></span>
+<span><span class="co">#&gt; 12     B gene13   9.938137 0.3418472      5   0.5</span></span>
+<span><span class="co">#&gt; 13     B  gene2   8.273987 0.3147537      5   0.5</span></span>
+<span><span class="co">#&gt; 14     B gene24   3.370467 0.7214700      5   0.5</span></span>
+<span><span class="co">#&gt; 15     B gene21   5.789423 0.5279636      5   0.5</span></span>
+<span><span class="co">#&gt; 16     B gene41   5.518354 0.6317005      5   0.5</span></span>
+<span><span class="co">#&gt; 17     B gene74   3.226598 0.4940783      5   0.5</span></span>
+<span><span class="co">#&gt; 18     B gene52   2.438579 0.5173769      5   0.5</span></span>
+<span><span class="co">#&gt; 19     B gene95   6.288173 0.4462475      5   0.5</span></span>
+<span><span class="co">#&gt; 20     B gene66   7.891588 0.5883218      5   0.5</span></span></code></pre>
 </div>
 </div>
 <div class="section level3">
@@ -131,11 +205,35 @@ particularly after some data-munging has been done. Both
 <code>data.frame</code> and <code>matrix</code> inputs require
 expression with genes as column names and sample IDs as rownames, as
 well as a factor vector of classes:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">clanc</span>(</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  synthetic_expression<span class="sc">$</span>expression</span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="at">classes =</span> synthetic_expression<span class="sc">$</span>classes,</span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="at">active =</span> <span class="dv">20</span></span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/clanc.html">clanc</a></span><span class="op">(</span></span>
+<span>  <span class="va">synthetic_expression</span><span class="op">$</span><span class="va">expression</span>,</span>
+<span>  classes <span class="op">=</span> <span class="va">synthetic_expression</span><span class="op">$</span><span class="va">classes</span>,</span>
+<span>  active <span class="op">=</span> <span class="fl">5</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; &lt;clanc&gt; </span></span>
+<span><span class="co">#&gt; $centroids</span></span>
+<span><span class="co">#&gt;    class   gene expression pooled_sd active prior</span></span>
+<span><span class="co">#&gt; 1      A gene12   7.514718 0.4779155      5   0.5</span></span>
+<span><span class="co">#&gt; 2      A  gene2   8.744821 0.3147537      5   0.5</span></span>
+<span><span class="co">#&gt; 3      A gene13   8.936462 0.3418472      5   0.5</span></span>
+<span><span class="co">#&gt; 4      A gene21   6.584681 0.5279636      5   0.5</span></span>
+<span><span class="co">#&gt; 5      A gene24   4.307301 0.7214700      5   0.5</span></span>
+<span><span class="co">#&gt; 6      A gene74   4.028507 0.4940783      5   0.5</span></span>
+<span><span class="co">#&gt; 7      A gene41   4.328516 0.6317005      5   0.5</span></span>
+<span><span class="co">#&gt; 8      A gene95   6.873184 0.4462475      5   0.5</span></span>
+<span><span class="co">#&gt; 9      A gene52   3.743798 0.5173769      5   0.5</span></span>
+<span><span class="co">#&gt; 10     A gene66   7.008174 0.5883218      5   0.5</span></span>
+<span><span class="co">#&gt; 11     B gene12   8.072284 0.4779155      5   0.5</span></span>
+<span><span class="co">#&gt; 12     B gene13   9.938137 0.3418472      5   0.5</span></span>
+<span><span class="co">#&gt; 13     B  gene2   8.273987 0.3147537      5   0.5</span></span>
+<span><span class="co">#&gt; 14     B gene24   3.370467 0.7214700      5   0.5</span></span>
+<span><span class="co">#&gt; 15     B gene21   5.789423 0.5279636      5   0.5</span></span>
+<span><span class="co">#&gt; 16     B gene41   5.518354 0.6317005      5   0.5</span></span>
+<span><span class="co">#&gt; 17     B gene74   3.226598 0.4940783      5   0.5</span></span>
+<span><span class="co">#&gt; 18     B gene52   2.438579 0.5173769      5   0.5</span></span>
+<span><span class="co">#&gt; 19     B gene95   6.288173 0.4462475      5   0.5</span></span>
+<span><span class="co">#&gt; 20     B gene66   7.891588 0.5883218      5   0.5</span></span></code></pre>
 </div>
 <div class="section level4">
 <h4 id="summarizedexperiment">
@@ -143,16 +241,24 @@ well as a factor vector of classes:</p>
 </h4>
 <p>Some common formats for expression are
 <code>SummarizedExperiment</code>s and <code>ExpressionSet</code>s:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/RangedSummarizedExperiment-class.html" class="external-link">SummarizedExperiment</a></span><span class="op">(</span></span>
 <span>  <span class="va">synthetic_expression</span><span class="op">$</span><span class="va">expression</span>,</span>
 <span>  colData <span class="op">=</span> <span class="fu">DataFrame</span><span class="op">(</span>class <span class="op">=</span> <span class="va">synthetic_expression</span><span class="op">$</span><span class="va">classes</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">se</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; class: SummarizedExperiment </span></span>
+<span><span class="co">#&gt; dim: 100 12 </span></span>
+<span><span class="co">#&gt; metadata(0):</span></span>
+<span><span class="co">#&gt; assays(1): ''</span></span>
+<span><span class="co">#&gt; rownames(100): gene1 gene2 ... gene99 gene100</span></span>
+<span><span class="co">#&gt; rowData names(0):</span></span>
+<span><span class="co">#&gt; colnames(12): sample1 sample2 ... sample11 sample12</span></span>
+<span><span class="co">#&gt; colData names(1): class</span></span></code></pre>
 <p>We can specify the name of the <code>colData</code>
 (<code>pData</code> for <code>ExpressionSet</code>s) column that
 contains the classes with the <code>classes</code> argument:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clanc.html">clanc</a></span><span class="op">(</span></span>
 <span>  <span class="va">se</span>,</span>
 <span>  classes <span class="op">=</span> <span class="st">"class"</span>,</span>
@@ -160,6 +266,89 @@ contains the classes with the <code>classes</code> argument:</p>
 <span>  assay <span class="op">=</span> <span class="fl">1</span> <span class="co"># Index of assay - SummarizedExperiments only</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">fit</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; &lt;clanc&gt; </span></span>
+<span><span class="co">#&gt; $centroids</span></span>
+<span><span class="co">#&gt;    class    gene expression pooled_sd active prior</span></span>
+<span><span class="co">#&gt; 1      A  gene11  2.2992343 1.2044848     20   0.5</span></span>
+<span><span class="co">#&gt; 2      A   gene2  8.7448209 0.3147537     20   0.5</span></span>
+<span><span class="co">#&gt; 3      A  gene13  8.9364621 0.3418472     20   0.5</span></span>
+<span><span class="co">#&gt; 4      A  gene20  2.1925558 1.3104010     20   0.5</span></span>
+<span><span class="co">#&gt; 5      A  gene10  4.9557850 0.8571716     20   0.5</span></span>
+<span><span class="co">#&gt; 6      A  gene21  6.5846813 0.5279636     20   0.5</span></span>
+<span><span class="co">#&gt; 7      A gene100  5.6455200 0.6175104     20   0.5</span></span>
+<span><span class="co">#&gt; 8      A  gene22  6.1650079 0.4699756     20   0.5</span></span>
+<span><span class="co">#&gt; 9      A  gene46  6.7344030 0.8233370     20   0.5</span></span>
+<span><span class="co">#&gt; 10     A  gene24  4.3073008 0.7214700     20   0.5</span></span>
+<span><span class="co">#&gt; 11     A  gene15  2.4254020 1.1910158     20   0.5</span></span>
+<span><span class="co">#&gt; 12     A  gene25  5.0353875 0.7498139     20   0.5</span></span>
+<span><span class="co">#&gt; 13     A  gene17  2.9424148 0.6628466     20   0.5</span></span>
+<span><span class="co">#&gt; 14     A   gene4  4.3839026 0.7144711     20   0.5</span></span>
+<span><span class="co">#&gt; 15     A  gene56  6.3441126 0.4078736     20   0.5</span></span>
+<span><span class="co">#&gt; 16     A  gene41  4.3285163 0.6317005     20   0.5</span></span>
+<span><span class="co">#&gt; 17     A  gene57  4.2237139 0.9531773     20   0.5</span></span>
+<span><span class="co">#&gt; 18     A   gene7  5.5545202 0.7875124     20   0.5</span></span>
+<span><span class="co">#&gt; 19     A  gene58  5.6162919 0.8161951     20   0.5</span></span>
+<span><span class="co">#&gt; 20     A  gene12  7.5147181 0.4779155     20   0.5</span></span>
+<span><span class="co">#&gt; 21     A   gene6  5.1534126 0.6194184     20   0.5</span></span>
+<span><span class="co">#&gt; 22     A  gene51  6.6256136 0.7737520     20   0.5</span></span>
+<span><span class="co">#&gt; 23     A  gene60  4.7434923 1.2945446     20   0.5</span></span>
+<span><span class="co">#&gt; 24     A  gene52  3.7437977 0.5173769     20   0.5</span></span>
+<span><span class="co">#&gt; 25     A  gene63  8.9293980 0.5635262     20   0.5</span></span>
+<span><span class="co">#&gt; 26     A  gene53  4.3774614 0.8370528     20   0.5</span></span>
+<span><span class="co">#&gt; 27     A  gene66  7.0081742 0.5883218     20   0.5</span></span>
+<span><span class="co">#&gt; 28     A  gene83  3.6532038 0.8444393     20   0.5</span></span>
+<span><span class="co">#&gt; 29     A  gene67  6.1384613 0.3677756     20   0.5</span></span>
+<span><span class="co">#&gt; 30     A  gene85  5.2179679 0.5930857     20   0.5</span></span>
+<span><span class="co">#&gt; 31     A  gene88  4.6008044 1.0603007     20   0.5</span></span>
+<span><span class="co">#&gt; 32     A  gene70  1.3073340 1.1264747     20   0.5</span></span>
+<span><span class="co">#&gt; 33     A  gene47  9.4528373 0.2030726     20   0.5</span></span>
+<span><span class="co">#&gt; 34     A  gene90  0.9794695 1.3272423     20   0.5</span></span>
+<span><span class="co">#&gt; 35     A  gene74  4.0285071 0.4940783     20   0.5</span></span>
+<span><span class="co">#&gt; 36     A  gene94  7.7773183 0.5375914     20   0.5</span></span>
+<span><span class="co">#&gt; 37     A  gene78  2.1763395 1.6805560     20   0.5</span></span>
+<span><span class="co">#&gt; 38     A  gene95  6.8731844 0.4462475     20   0.5</span></span>
+<span><span class="co">#&gt; 39     A  gene79  3.7138831 1.0587367     20   0.5</span></span>
+<span><span class="co">#&gt; 40     A  gene98  4.5710407 0.6798799     20   0.5</span></span>
+<span><span class="co">#&gt; 41     B  gene10  4.2378889 0.8571716     20   0.5</span></span>
+<span><span class="co">#&gt; 42     B   gene2  8.2739866 0.3147537     20   0.5</span></span>
+<span><span class="co">#&gt; 43     B gene100  5.0435040 0.6175104     20   0.5</span></span>
+<span><span class="co">#&gt; 44     B  gene20  3.4781598 1.3104010     20   0.5</span></span>
+<span><span class="co">#&gt; 45     B  gene46  7.0200767 0.8233370     20   0.5</span></span>
+<span><span class="co">#&gt; 46     B  gene11  1.2780748 1.2044848     20   0.5</span></span>
+<span><span class="co">#&gt; 47     B  gene12  8.0722841 0.4779155     20   0.5</span></span>
+<span><span class="co">#&gt; 48     B  gene22  6.4609169 0.4699756     20   0.5</span></span>
+<span><span class="co">#&gt; 49     B  gene51  5.8920005 0.7737520     20   0.5</span></span>
+<span><span class="co">#&gt; 50     B  gene13  9.9381374 0.3418472     20   0.5</span></span>
+<span><span class="co">#&gt; 51     B  gene15  1.6008569 1.1910158     20   0.5</span></span>
+<span><span class="co">#&gt; 52     B  gene25  4.5015558 0.7498139     20   0.5</span></span>
+<span><span class="co">#&gt; 53     B  gene17  2.5005839 0.6628466     20   0.5</span></span>
+<span><span class="co">#&gt; 54     B   gene4  4.9225469 0.7144711     20   0.5</span></span>
+<span><span class="co">#&gt; 55     B  gene56  6.1067832 0.4078736     20   0.5</span></span>
+<span><span class="co">#&gt; 56     B  gene41  5.5183538 0.6317005     20   0.5</span></span>
+<span><span class="co">#&gt; 57     B  gene57  3.1175271 0.9531773     20   0.5</span></span>
+<span><span class="co">#&gt; 58     B   gene7  5.3367575 0.7875124     20   0.5</span></span>
+<span><span class="co">#&gt; 59     B  gene21  5.7894231 0.5279636     20   0.5</span></span>
+<span><span class="co">#&gt; 60     B  gene47  9.5903798 0.2030726     20   0.5</span></span>
+<span><span class="co">#&gt; 61     B   gene6  4.4655748 0.6194184     20   0.5</span></span>
+<span><span class="co">#&gt; 62     B  gene74  3.2265977 0.4940783     20   0.5</span></span>
+<span><span class="co">#&gt; 63     B  gene24  3.3704670 0.7214700     20   0.5</span></span>
+<span><span class="co">#&gt; 64     B  gene52  2.4385792 0.5173769     20   0.5</span></span>
+<span><span class="co">#&gt; 65     B  gene63  8.3234317 0.5635262     20   0.5</span></span>
+<span><span class="co">#&gt; 66     B  gene53  3.8479638 0.8370528     20   0.5</span></span>
+<span><span class="co">#&gt; 67     B  gene66  7.8915875 0.5883218     20   0.5</span></span>
+<span><span class="co">#&gt; 68     B  gene83  4.2757218 0.8444393     20   0.5</span></span>
+<span><span class="co">#&gt; 69     B  gene67  6.0190764 0.3677756     20   0.5</span></span>
+<span><span class="co">#&gt; 70     B  gene85  5.8877225 0.5930857     20   0.5</span></span>
+<span><span class="co">#&gt; 71     B  gene79  4.1894417 1.0587367     20   0.5</span></span>
+<span><span class="co">#&gt; 72     B  gene58  4.7194615 0.8161951     20   0.5</span></span>
+<span><span class="co">#&gt; 73     B  gene88  5.5945405 1.0603007     20   0.5</span></span>
+<span><span class="co">#&gt; 74     B  gene70  1.5987845 1.1264747     20   0.5</span></span>
+<span><span class="co">#&gt; 75     B  gene90  1.4036889 1.3272423     20   0.5</span></span>
+<span><span class="co">#&gt; 76     B  gene60  5.2336968 1.2945446     20   0.5</span></span>
+<span><span class="co">#&gt; 77     B  gene78  1.6625207 1.6805560     20   0.5</span></span>
+<span><span class="co">#&gt; 78     B  gene95  6.2881728 0.4462475     20   0.5</span></span>
+<span><span class="co">#&gt; 79     B  gene98  4.1346296 0.6798799     20   0.5</span></span>
+<span><span class="co">#&gt; 80     B  gene94  8.4222554 0.5375914     20   0.5</span></span></code></pre>
 </div>
 </div>
 </div>
@@ -172,13 +361,45 @@ data. The new data can come in the form of a <code>matrix</code>,
 <code>ExpressionSet</code>, with the same expected input</p>
 <p>Using <code>type = "class"</code> will predict classes using the
 metric provided by Alan Dabney in the original ClaNC paper.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit</span>, new_data <span class="op">=</span> <span class="va">se</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; 40/40 (100%) genes in centroids found in `new_data`</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 12 × 1</span></span></span>
+<span><span class="co">#&gt;    .pred_class</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> A          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> A          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> A          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> A          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> A          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> A          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> B          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> B          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> B          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> B          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> B          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span> B</span></span></code></pre>
 <p>However, particularly if comparing across datasets that may have been
 transformed differently, it may be more accurate to use a correlation
 based metric:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit</span>, new_data <span class="op">=</span> <span class="va">se</span>, type <span class="op">=</span> <span class="st">"numeric"</span>, method <span class="op">=</span> <span class="st">"spearman"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; 40/40 (100%) genes in centroids found in `new_data`</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 12 × 2</span></span></span>
+<span><span class="co">#&gt;    .pred_A .pred_B</span></span>
+<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>   0.901   0.811</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>   0.929   0.849</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>   0.932   0.840</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>   0.912   0.829</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>   0.862   0.770</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>   0.932   0.869</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>   0.776   0.904</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>   0.824   0.931</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>   0.828   0.924</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>   0.855   0.946</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>   0.805   0.915</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>   0.750   0.869</span></span></code></pre>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
