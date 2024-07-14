@@ -6,4 +6,6 @@ reference:
   contents:
   - clanc
   - predict.clanc
-
+- title: Data
+  contents:
+  - synthetic_data
