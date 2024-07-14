@@ -205,8 +205,7 @@ clanc.SummarizedExperiment <- function(x,
     metadata <- cbind(metadata, active = x[[active]])
 
   if (spec_in_cd(classes, cd_names) &&
-        nrow(unique(metadata)) > length(unique(metadata$classes))) {
-    cli::cli_abort(
+        nrow(unique(metadata)) > length(unique(metadata[[classes]]))) {
     cli::cli_abort(c(
       "More than one prior and/or active for each class",
       "i" = "Each class must have exactly 1 prior and active",
