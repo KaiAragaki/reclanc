@@ -1,0 +1,9 @@
+url: https://kaiaragaki.github.io/reclanc/
+template:
+  bootstrap: 5
+reference:
+- title: Functions
+  contents:
+  - clanc
+  - predict.clanc
+

@@ -21,7 +21,7 @@ Description: Classification of microarrays to nearest centroids (ClaNC)
   reimplements this algorithm, with the the additional benefit of increased
   interoperability with standard data structures and modeling ecosystems.
 License: MIT + file LICENSE
-URL: https://github.com/KaiAragaki/reclanc
+URL: https://github.com/KaiAragaki/reclanc, https://kaiaragaki.github.io/reclanc/
 BugReports: https://github.com/KaiAragaki/reclanc/issues
 Depends:
     R (>= 4.1.0)
