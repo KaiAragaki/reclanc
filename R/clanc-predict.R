@@ -18,16 +18,6 @@
 #' A tibble of predictions. The number of rows in the tibble is guaranteed
 #' to be the same as the number of rows in `new_data`.
 #'
-#' @examples
-#' train <- mtcars[1:20,]
-#' test <- mtcars[21:32, -1]
-#'
-#' # Fit
-#' mod <- clanc(mpg ~ cyl + log(drat), train)
-#'
-#' # Predict, with preprocessing
-#' predict(mod, test)
-#'
 #' @export
 predict.clanc <- function(object, new_data, type, ...) {
   new_data <- wrangle_data(new_data)

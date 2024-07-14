@@ -18,6 +18,8 @@ Valid options are:
 }}
 
 \item{...}{Not used, but required for extensibility.}
+
+\item{method}{If \code{type} is \code{numeric}, the method of correlation}
 }
 \value{
 A tibble of predictions. The number of rows in the tibble is guaranteed
@@ -25,15 +27,4 @@ to be the same as the number of rows in \code{new_data}.
 }
 \description{
 Predict from a \code{clanc}
-}
-\examples{
-train <- mtcars[1:20,]
-test <- mtcars[21:32, -1]
-
-# Fit
-mod <- clanc(mpg ~ cyl + log(drat), train)
-
-# Predict, with preprocessing
-predict(mod, test)
-
 }

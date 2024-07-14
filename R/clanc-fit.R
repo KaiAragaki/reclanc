@@ -115,10 +115,7 @@
 #'   )
 #' )
 #'
-#' clanc(se, classes = "class", active = "active", priors = "prior")
-#'
-#' # metadata can also be supplied as vectors
-#' clanc(se, classes = classes, active = 10, priors = "equal")
+#' clanc(se, classes = "class", active = "active", priors = "equal")
 #'
 #' # ExpressionSet interface:
 #' adf <- data.frame(
