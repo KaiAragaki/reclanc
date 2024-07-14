@@ -13,13 +13,18 @@ knitr::opts_chunk$set(
 )
 ```
 
+# Introduction
+
+This vignette will provide a brief introduction into the basic *usage* of `reclanc`. If you're interested in how `reclanc` works, I'd recommend reading the [blog post](https://kai.rbind.io/posts/projects-reclanc/) I wrote and the [original paper](https://academic.oup.com/bioinformatics/article/21/22/4148/194954?login=false) by Alan Dabney, who created the original `ClaNC` algorithm.
+
+# Fitting
+
 ```{r setup, message = FALSE}
 library(reclanc)
 library(SummarizedExperiment)
 library(parsnip)
 ```
 
-# Fitting
 
 To create new centroids from existing expression data, use the `clanc` function.
 
