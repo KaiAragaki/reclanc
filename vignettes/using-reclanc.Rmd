@@ -25,7 +25,7 @@ To create new centroids from existing expression data, use the `clanc` function.
 
 `reclanc` provides some synthetic expression data that we can work with:
 
-```r
+```{r}
 lapply(synthetic_expression, head)
 ```
 
@@ -42,7 +42,7 @@ Wide inputs require data that has both predictors and outcomes as columns, toget
 
 ### Formula
 
-```r
+```{r}
 form_data <- cbind(
   class = synthetic_expression$classes,
   as.data.frame(t(synthetic_expression$expression))
@@ -50,17 +50,17 @@ form_data <- cbind(
 head(form_data[1:5])
 ```
 
-```r
-clanc(class ~ ., form_data, active = 20)
+```{r}
+clanc(class ~ ., form_data, active = 5)
 ```
 
 ### `recipe`
 
 `reclanc` also supports `tidymodels` workflows:
 
-```r
+```{r}
 discrim_linear() |>
-  set_engine("clanc", active = 20) |>
+  set_engine("clanc", active = 5) |>
   fit(class ~ ., data = form_data)
 ```
 
@@ -73,11 +73,11 @@ Tall inputs require genes as rows and samples as columns
 It is often convenient to supply a `data.frame`, particularly after some data-munging has been done. Both `data.frame` and `matrix` inputs require expression with genes as column names and sample IDs as rownames, as well as a factor vector of classes:
 
 
-```r
+```{r}
 clanc(
-  synthetic_expression$expression
+  synthetic_expression$expression,
   classes = synthetic_expression$classes,
-  active = 20
+  active = 5
 )
 ```
 
@@ -85,7 +85,7 @@ clanc(
 
 Some common formats for expression are `SummarizedExperiment`s and `ExpressionSet`s:
 
-```r
+```{r}
 se <- SummarizedExperiment(
   synthetic_expression$expression,
   colData = DataFrame(class = synthetic_expression$classes)
@@ -95,7 +95,7 @@ se
 
 We can specify the name of the `colData` (`pData` for `ExpressionSet`s) column that contains the classes with the `classes` argument:
 
-```r
+```{r}
 fit <- clanc(
   se,
   classes = "class",
@@ -112,12 +112,12 @@ The fit can then be used to predict classes of new samples from new data. The ne
 
 Using `type = "class"` will predict classes using the metric provided by Alan Dabney in the original ClaNC paper.
 
-```r
+```{r}
 predict(fit, new_data = se, type = "class")
 ```
 
 However, particularly if comparing across datasets that may have been transformed differently, it may be more accurate to use a correlation based metric:
 
-```r
+```{r}
 predict(fit, new_data = se, type = "numeric", method = "spearman")
 ```
