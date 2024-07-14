@@ -90,6 +90,7 @@ select_genes <- function(abs_stats, ranks, ties, class_data) {
   )
 }
 
+#' @importFrom rlang .data
 selection_recurse <- function(df) {
   if (all(df$reserved) || all(df$n_win >= df$active)) {
     return(NULL)

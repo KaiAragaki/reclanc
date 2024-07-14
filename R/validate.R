@@ -28,9 +28,9 @@ validate_dv <- function(se, formula, priors, active) {
 
 validate_iv <- function(se, formula) {
   iv <- get_var_info_from_form(se, formula, 2)
-  if (!iv$name %in% colnames(rowData(se))) {
+  if (!iv$name %in% colnames(SummarizedExperiment::rowData(se))) {
     cli::cli_abort(
-      "{.var {iv$name}} does not exist in {.code rowData(se)}"
+      "{.var {iv$name}} does not exist in {.code SumarizedExperiment::rowData(se)}"
     )
   }
 

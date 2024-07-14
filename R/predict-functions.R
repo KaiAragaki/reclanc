@@ -11,9 +11,9 @@ calc_dist <- function(all) {
 
   vv <- all$pooled_sd^2
   first_term <- (all$expression / all$pooled_sd)^2 |>
-    aggregate(by = list(all$class), FUN = sum)
+    stats::aggregate(by = list(all$class), FUN = sum)
   second_term <- (-2 * (user_data * all$expression / vv)) |>
-    aggregate(by = list(all$class), FUN = sum)
+    stats::aggregate(by = list(all$class), FUN = sum)
 
   priors <- unique(data.frame(class = all$class, prior = all$prior))
   priors$log_priors <- 2 * log(priors$prior)

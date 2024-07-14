@@ -89,7 +89,7 @@ too_many_case_weights <- function(x, call = rlang::caller_env()) {
 
 get_lhs_vars <- function(formula, data) {
   if (!rlang::is_formula(formula)) {
-    formula <- as.formula(formula)
+    formula <- stats::as.formula(formula)
   }
   ## Want to make sure that multiple outcomes can be expressed as
   ## additions with no cbind business and that `.` works too (maybe)
