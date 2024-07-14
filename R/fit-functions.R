@@ -139,7 +139,8 @@ make_new_ptypes <- function(fit, processed) {
   # make a dummy tibble w proper dims
   preds <- matrix(1.0, nrow = 1, ncol = length(genes))
   colnames(preds) <- genes
-  preds <- tibble::as_tibble(preds)
-  preds <- preds[-1, ]
-  list(predictors = preds, outcomes = processed$blueprint$ptypes$outcomes)
+  list(
+    predictors = hardhat::extract_ptype(preds),
+    outcomes = processed$blueprint$ptypes$outcomes
+  )
 }
