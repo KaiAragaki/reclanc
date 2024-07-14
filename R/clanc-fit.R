@@ -302,6 +302,9 @@ clanc.recipe <- function(x, data, active, priors = "equal", ...) {
 
 clanc_bridge <- function(processed, active, priors, ...) {
 
+  # NOTE What happens if classes supplied upstream are not the proper length?
+  # That is, the length of the vector is shorter than the length of the data?
+  # (not necessarily n_levels deficiency)
   active <- process_active(processed, active, priors, ...)
   priors <- process_priors(processed, active, priors, ...)
   validate_classes(processed, active, priors)
@@ -316,9 +319,17 @@ clanc_bridge <- function(processed, active, priors, ...) {
   )
   fit <- clanc_impl(expression, class_data, classes)
 
+  # Create a new blueprint using only active genes
+  bp <- hardhat::new_xy_blueprint(
+    intercept = FALSE,
+    allow_novel_levels = FALSE,
+    composition = "tibble",
+    ptypes = make_new_ptypes(fit, processed)
+  )
+
   new_clanc(
     centroids = fit$centroids,
-    blueprint = processed$blueprint
+    blueprint = bp
   )
 }
 

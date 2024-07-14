@@ -133,3 +133,13 @@ create_centroids <- function(selected, class_means, overall_means) {
   colnames(out) <- lvls
   out
 }
+
+make_new_ptypes <- function(fit, processed) {
+  genes <- unique(fit$centroids$gene)
+  # make a dummy tibble w proper dims
+  preds <- matrix(1.0, nrow = 1, ncol = length(genes))
+  colnames(preds) <- genes
+  preds <- tibble::as_tibble(preds)
+  preds <- preds[-1, ]
+  list(predictors = preds, outcomes = processed$blueprint$ptypes$outcomes)
+}
