@@ -64,13 +64,23 @@
 
     
     
+<div class="section level2">
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h2>
+<p>This vignette will provide a brief introduction into the basic
+<em>usage</em> of <code>reclanc</code>. If you’re interested in how
+<code>reclanc</code> works, I’d recommend reading the <a href="https://kai.rbind.io/posts/projects-reclanc/" class="external-link">blog post</a> I
+wrote and the <a href="https://academic.oup.com/bioinformatics/article/21/22/4148/194954?login=false" class="external-link">original
+paper</a> by Alan Dabney, who created the original <code>ClaNC</code>
+algorithm.</p>
+</div>
+<div class="section level2">
+<h2 id="fitting">Fitting<a class="anchor" aria-label="anchor" href="#fitting"></a>
+</h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/KaiAragaki/reclanc" class="external-link">reclanc</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/SummarizedExperiment" class="external-link">SummarizedExperiment</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/parsnip" class="external-link">parsnip</a></span><span class="op">)</span></span></code></pre></div>
-<div class="section level2">
-<h2 id="fitting">Fitting<a class="anchor" aria-label="anchor" href="#fitting"></a>
-</h2>
 <p>To create new centroids from existing expression data, use the
 <code>clanc</code> function.</p>
 <p><code>reclanc</code> provides some synthetic expression data that we
