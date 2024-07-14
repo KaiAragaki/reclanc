@@ -212,8 +212,8 @@ clanc.SummarizedExperiment <- function(x,
       "i" = "To test across many `active`, use `tune::tune_grid`"
     ))
   } else {
-    metadata <- unique(metadata)
     classes <- metadata$class
+    metadata <- unique(metadata)
     if ((!priors %in% c("equal", "class")) && spec_in_cd(priors, cd_names)) {
       priors <- metadata$priors
     }
