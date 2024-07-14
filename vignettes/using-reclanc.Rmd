@@ -29,7 +29,7 @@ To create new centroids from existing expression data, use the `clanc` function.
 lapply(synthetic_expression, head)
 ```
 
-These data include 10 samples, 5 of class "A" and 5 of class "B", with 100 genes.
+These data include 12 samples, 6 of class "A" and 6 of class "B", with 100 genes.
 
 `reclanc` is able to ingest a variety of common formats for expression data. Objects like `SummarizedExperiments` and `ExpressionSets` are frequently used in bioinformatic analyses and arrange their data so samples are in columns and genes are in rows. This is in conflict with the expected formula input in base R, where predictors (genes) and outcomes (classes) are in columns. `reclanc` eases this friction by expecting input in its most common format, abstracting away the wrangling aspect of analysis.
 
