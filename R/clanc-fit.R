@@ -207,10 +207,11 @@ clanc.SummarizedExperiment <- function(x,
   if (spec_in_cd(classes, cd_names) &&
         nrow(unique(metadata)) > length(unique(metadata$classes))) {
     cli::cli_abort(
+    cli::cli_abort(c(
       "More than one prior and/or active for each class",
       "i" = "Each class must have exactly 1 prior and active",
       "i" = "To test across many `active`, use `tune::tune_grid`"
-    )
+    ))
   } else {
     metadata <- unique(metadata)
     classes <- metadata$class
