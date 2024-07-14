@@ -8,4 +8,4 @@ reference:
   - predict.clanc
 - title: Data
   contents:
-  - synthetic_data
+  - synthetic_expression
