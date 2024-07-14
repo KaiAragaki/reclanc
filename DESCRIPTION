@@ -31,7 +31,9 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
 Suggests:
     Biobase,
+    knitr,
     recipes,
+    rmarkdown,
     SummarizedExperiment,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
@@ -43,3 +45,4 @@ Imports:
     rlang,
     stats
 LazyData: true
+VignetteBuilder: knitr

@@ -1,0 +1,45 @@
+---
+title: "using-reclanc"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{using-reclanc}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(reclanc)
+library(SummarizedExperiment)
+```
+
+# Fitting
+
+To create new centroids from existing expression data, use the `clanc` function.
+
+`reclanc` provides some synthetic expression data that we can work with:
+
+```r
+lapply(synthetic_expression, head)
+```
+
+These data include 10 samples, 5 of class "A" and 5 of class "B", with 100 genes.
+
+`reclanc` is able to ingest a variety of common formats for expression data. One common format for expression is the `SummarizedExperiment`:
+
+```r
+se <- SummarizedExperiment(
+  synthetic_expression$expression,
+  colData = DataFrame(class = synthetic_expression$classes)
+)
+```
+
+
+
+# Predicting
