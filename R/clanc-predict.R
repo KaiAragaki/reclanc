@@ -30,7 +30,8 @@
 #'
 #' @export
 predict.clanc <- function(object, new_data, type, ...) {
-  forged <- hardhat::forge(new_data, object$blueprint)
+  new_data <- wrangle_data(new_data)
+  forged <- custom_forge(new_data, object$blueprint)
   rlang::arg_match(type, valid_clanc_predict_types())
   predict_clanc_bridge(type, object, forged$predictors, ...)
 }

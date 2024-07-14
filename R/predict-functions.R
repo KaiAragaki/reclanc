@@ -51,3 +51,53 @@ predict_dist_multi <- function(dists) {
 }
 
 # dists: col = sample, row = class, value = dist
+
+wrangle_data <- function(data) {
+  if (inherits(data, "SummarizedExperiment")) return(wrangle_data_se(data))
+  if (inherits(data, "data.frame")) return(wrangle_data_df(data))
+  if (inherits(data, "matrix")) return(wrangle_data_matrix(data))
+  if (inherits(data, "ExpressionSet")) return(wrangle_data_es(data))
+  cli::cli_abort("Unable to predict object of type {class(data)}")
+}
+
+wrangle_data_se <- function(data) {
+  # Should assay number be an optional arg?
+  data <- SummarizedExperiment::assay(data)
+  t(data)
+}
+
+wrangle_data_df <- function(data) {
+  data
+}
+
+wrangle_data_matrix <- function(data) {
+  data
+}
+
+wrangle_data_es <- function(data) {
+  t(Biobase::exprs(data))
+}
+
+
+# Often, not all of the predictors will be present
+# This is typical and worth working around rather than erroring
+custom_forge <- function(new_data, blueprint) {
+  predictors <- colnames(blueprint$ptypes$predictors)
+  contains <- intersect(predictors, colnames(new_data))
+
+  if (length(contains) == 0) {
+    cli::cli_abort("No genes in centroids detected in `new_data`")
+  }
+
+  u_pred <- length(unique(predictors))
+  u_nd <- length(contains)
+  pct_found <- round(100 * u_nd/ u_pred)
+
+  cli::cli_inform(
+    "{u_nd}/{u_pred} ({pct_found}%) genes in centroids found in `new_data`"
+  )
+
+  new_data <- new_data[, which(colnames(new_data) %in% contains)]
+  new_data <- tibble::as_tibble(new_data)
+  list(predictors = new_data, outcomes = NULL, extras = NULL)
+}
