@@ -73,13 +73,22 @@
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
 <p>Let’s consider a relatively full-featured, practical use case for
-ClaNC.</p>
-<p>Let’s start with the fitting procedure. We first need gene expression
-data.</p>
+<code>reclanc</code>. In this vignette, we’ll go over the basics of
+fitting models, as well as how to leverage <code>tidymodels</code> to do
+more elaborate things like resampling and tuning hyperparameters. We’ll
+fit a final model, then use that to predict subtypes of an entirely new
+dataset.</p>
+<p>This vignette tries to assume very little knowledge about machine
+learning or <code>tidymodels</code>.</p>
 </div>
 <div class="section level2">
-<h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
+<h2 id="fitting">Fitting<a class="anchor" aria-label="anchor" href="#fitting"></a>
 </h2>
+<div class="section level3">
+<h3 id="a-simple-fit">A simple fit<a class="anchor" aria-label="anchor" href="#a-simple-fit"></a>
+</h3>
+<p>Let’s start with the fitting procedure. We first need gene expression
+data.</p>
 <p>The data I’m using is from <a href="https://pubmed.ncbi.nlm.nih.gov/22553347/" class="external-link">Sjödahl et
 al. (2012)</a>. It contains RNA expression from 308 bladder cancer
 tumors.</p>
@@ -97,25 +106,17 @@ tumors.</p>
 <span><span class="co">#&gt; featureData: none</span></span>
 <span><span class="co">#&gt; experimentData: use 'experimentData(object)'</span></span>
 <span><span class="co">#&gt; Annotation:</span></span></code></pre></div>
-<p>In their paper, they used the transcriptional data to classify the
-tumors into several molecular subtypes (MS).</p>
+<p>In their paper, Sjödahl et al. used the transcriptional data to
+classify the tumors into seven molecular subtypes (MS):</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">lund</span><span class="op">$</span><span class="va">molecular_subtype</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;    MS1a    MS1b  MS2a.1  MS2a.2  MS2b.1 MS2b2.1 MS2b2.2 </span></span>
 <span><span class="co">#&gt;      53      78      30      55      43      20      29</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="fitting">Fitting<a class="anchor" aria-label="anchor" href="#fitting"></a>
-</h2>
-<div class="section level3">
-<h3 id="a-simple-fit">A simple fit<a class="anchor" aria-label="anchor" href="#a-simple-fit"></a>
-</h3>
-<p>We’d like to apply this subtype framework to other datasets. Our
-first goal is to generate centroids.</p>
-<p>Before we can begin, we need to convert our outcomes to factors. In
-this case, our outcomes are the molecular subtypes called by Sjödahl et
-al.</p>
+<p>We’d like to apply this subtype framework to other datasets. To do
+this, we first need to generate centroids. Before we can begin, though,
+we need to convert our outcomes to factors. In this case, our outcomes
+are the molecular subtypes:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lund</span><span class="op">$</span><span class="va">molecular_subtype</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">lund</span><span class="op">$</span><span class="va">molecular_subtype</span><span class="op">)</span></span></code></pre></div>
 <p>In its simplest form, since <code>clanc</code> accepts
@@ -131,32 +132,56 @@ done with it:</p>
 <span><span class="co">#&gt; 4  MS1a    BNC1   5.297095 0.2106762      5 0.1428571</span></span>
 <span><span class="co">#&gt; 5  MS1a  SLFN11   7.362887 0.6824663      5 0.1428571</span></span>
 <span><span class="co">#&gt; 6  MS1a    CRAT   6.004517 0.3425669      5 0.1428571</span></span></code></pre></div>
+<p>The problem with this method, though, is we have no idea if this is a
+good fit or not. <code>active</code> is an argument that specifies the
+number of genes that are used as distinguishing features for a given
+class. In this case, each class will find 5 genes that have expression
+patterns peculiar to that given molecular subtype, and each subtype will
+have 7 (the total number of subtypes) x 5 (number of active genes) = 35
+genes in it (see my <a href="https://kai.rbind.io/posts/projects-reclanc/" class="external-link">blog post</a> or -
+better yet - <a href="http://www.ncbi.nlm.nih.gov/pubmed/16174683" class="external-link">the
+original paper</a> for more details). Could we have gotten a better fit
+with more genes? Are we selecting more genes than we need? How would we
+know?</p>
 </div>
 <div class="section level3">
 <h3 id="setting-the-stage-for-more-elaborate-analyses">Setting the stage for more elaborate analyses<a class="anchor" aria-label="anchor" href="#setting-the-stage-for-more-elaborate-analyses"></a>
 </h3>
-<p>For the next few sections, we’re going to leverage the
-<code>tidymodels</code> collection of packages. In order to ease into
-that, I’ll show you how to do the same analysis, but with packages from
-<code>tidymodels</code>.</p>
+<p>Before we can get started on tackling these larger questions, let’s
+take a brief detour to the land of <a href="https://www.tidymodels.org/" class="external-link"><code>tidymodels</code></a>.
+<code>tidymodels</code> is a collection of packages that make running
+and tuning algorithms like this much less painful and much more
+standardized.</p>
+<p>In order to leverage <code>tidymodels</code>, we need to buy-in to
+their data structures.</p>
+<p>(Aside: I don’t mean to make the buy-in sound begrudging. When I say
+need, I really mean it: we’re going to be specifying very long formulas,
+which for some reason R really, <em>really</em> hates. Emil Hvitfeldt
+recently (at time of writing) has <a href="https://github.com/tidymodels/recipes/pull/1283" class="external-link">allowed
+<code>tidymodels</code> to handle long formulas gracefully</a>, so using
+<code>tidymodels</code> infrastructure is a gift, not a chore.)</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span></code></pre></div>
 <p>Many <code>tidymodels</code> workflows begin with a <em>model
 specification</em>. The rationale behind this is to separate the
 <em>model specification</em> step from the <em>model fitting</em> step
-(whereas in base R, they generally all happen at once).</p>
-<p>We specify our model like this:</p>
+(whereas in base R, they generally all happen at once).
+<code>reclanc</code> makes it easy to specify a model by adding a custom
+engine to <code><a href="https://parsnip.tidymodels.org/reference/discrim_linear.html" class="external-link">parsnip::discrim_linear</a></code>, so specifying a model
+looks like this:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu">discrim_linear</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">set_engine</span><span class="op">(</span></span>
-<span>    engine <span class="op">=</span> <span class="st">"clanc"</span>,</span>
+<span>    engine <span class="op">=</span> <span class="st">"clanc"</span>, <span class="co"># Note: "clanc", not "reclanc"</span></span>
 <span>    active <span class="op">=</span> <span class="fl">5</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
 <p>This <code>mod</code> doesn’t do anything - and that’s kind of the
 point: it only specifies the model we will later fit with, but doesn’t
-do any fitting itself.</p>
-<p>We also need to wrangle our data a bit to be in a ‘wide’ format -
-fortunately that’s quite simple:</p>
+do any fitting itself. This allows us to reuse the specification across
+our code.</p>
+<p>The next step is to wrangle our data a bit to be in a ‘wide’ format,
+where all columns are outcomes (classes) and predictors (genes), and all
+rows are observations (samples):</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wrangled</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>class <span class="op">=</span> <span class="va">lund</span><span class="op">$</span><span class="va">molecular_subtype</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Biobase/man/exprs.html" class="external-link">exprs</a></span><span class="op">(</span><span class="va">lund</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">wrangled</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span></span>
@@ -168,10 +193,10 @@ fortunately that’s quite simple:</p>
 <span><span class="co">#&gt; UC_0007_1 MS2a.2 5.414919 5.510507 10.482469 6.435552</span></span>
 <span><span class="co">#&gt; UC_0008_1 MS2b.1 5.279174 5.633093  9.112754 7.057977</span></span></code></pre></div>
 <p>Finally, we specify a formula for fitting the model. This uses the
-<code>recipes</code> package from tidymodels. While this is a delightful
-package that can help you preprocess your data, it’s out of the scope of
-this vignette. Instead, just think of it as a way to specify a
-formula.</p>
+<code>recipes</code> package from <code>tidymodels</code>. While this is
+a delightful package that can help you preprocess your data, it’s out of
+the scope of this vignette. Instead, just think of it as a way to
+specify a formula that keeps R from blowing up:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">recipe</span> <span class="op">&lt;-</span> <span class="fu">recipe</span><span class="op">(</span><span class="va">class</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">wrangled</span><span class="op">)</span> <span class="co"># Note that the recipe requires 'template data'</span></span></code></pre></div>
 <p>We can bundle our model specification (<code>mod</code>) and our
@@ -201,6 +226,9 @@ a <code>workflow</code>:</p>
 <code class="sourceCode R"><span><span class="va">tidymodels_fit</span> <span class="op">&lt;-</span> <span class="fu">fit</span><span class="op">(</span><span class="va">wf</span>, data <span class="op">=</span> <span class="va">wrangled</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tidymodels_fit</span><span class="op">$</span><span class="va">fit</span><span class="op">$</span><span class="va">centroids</span><span class="op">)</span></span>
 <span><span class="co">#&gt; NULL</span></span></code></pre></div>
+<p>You’ll notice that our results are the same as what we saw
+previously, demonstrating that while we’re using <code>tidymodels</code>
+rather than base R, we’re still doing the same thing.</p>
 </div>
 <div class="section level3">
 <h3 id="measuring-fit-accuracy-with-cross-validation">Measuring fit accuracy with cross-validation<a class="anchor" aria-label="anchor" href="#measuring-fit-accuracy-with-cross-validation"></a>
@@ -210,10 +238,18 @@ can do a lot of elaborate things with ease. One of our concerns is
 whether 5 active genes was a good choice (<code>active = 5</code>). A
 somewhat simple way to determine how good our choice of 5 genes is to
 use <a href="https://en.wikipedia.org/wiki/Cross-validation_(statistics)" class="external-link">cross-validation</a>.
-Cross-validation allows us to test how good our fit, without having to
-spend our test data. Speaking of which, let’s split our data into
-training and testing data right now. To do this, we’re going to use the
-lovely <code>rsample</code> package.</p>
+Cross-validation allows us to test how good our fit is by training our
+model on, say, 80% of our data, and testing it on the rest (see the
+Wikipedia diagram of a k-fold cross validation). This allows us to get a
+measure of how good our fit is, without having to break out our actual
+test data - which in general should only be used when we’re ready to
+finalize our model.</p>
+<p>Speaking of test data, let’s go ahead and split that off now. We’ll
+lock our test data away and only use it once we’ve fit our final model.
+Until then, we’ll use cross validation to assess how good the fit is,
+essentially using our training data as its own testing data.</p>
+<p>Of course, <code>tidymodels</code> makes this easy too, by using
+<code><a href="https://rsample.tidymodels.org/reference/initial_split.html" class="external-link">rsample::initial_split</a></code>:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">splits</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">wrangled</span>, prop <span class="op">=</span> <span class="fl">0.8</span>, strata <span class="op">=</span> <span class="va">class</span><span class="op">)</span></span>
@@ -234,21 +270,47 @@ each of the classes within each of the datasets (because we set
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;    MS1a    MS1b  MS2a.1  MS2a.2  MS2b.1 MS2b2.1 MS2b2.2 </span></span>
 <span><span class="co">#&gt;    0.19    0.27    0.08    0.16    0.11    0.05    0.16</span></span></code></pre></div>
-<p>Creating folds for crossfold validation is nearly the same:</p>
+<p>Creating folds for cross validation is nearly the same as
+<code>initial_split</code>:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">folds</span> <span class="op">&lt;-</span> <span class="fu">vfold_cv</span><span class="op">(</span><span class="va">train</span>, v <span class="op">=</span> <span class="fl">5</span>, strata <span class="op">=</span> <span class="va">class</span><span class="op">)</span></span></code></pre></div>
-<p>We can reuse our workflow <code>wf</code>:</p>
+<code class="sourceCode R"><span><span class="va">folds</span> <span class="op">&lt;-</span> <span class="fu">vfold_cv</span><span class="op">(</span><span class="va">train</span>, v <span class="op">=</span> <span class="fl">5</span>, strata <span class="op">=</span> <span class="va">class</span><span class="op">)</span></span>
+<span><span class="va">folds</span></span>
+<span><span class="co">#&gt; #  5-fold cross-validation using stratification </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 2</span></span></span>
+<span><span class="co">#&gt;   splits           id   </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> <span style="color: #949494;">&lt;split [193/51]&gt;</span> Fold1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> <span style="color: #949494;">&lt;split [193/51]&gt;</span> Fold2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> <span style="color: #949494;">&lt;split [195/49]&gt;</span> Fold3</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> <span style="color: #949494;">&lt;split [197/47]&gt;</span> Fold4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> <span style="color: #949494;">&lt;split [198/46]&gt;</span> Fold5</span></span></code></pre></div>
+<p>We can reuse our workflow <code>wf</code>, which contains our model
+and formula. The only difference is that we use
+<code>fit_resamples</code>, and we specify a metric we want to use to
+measure how good our fit is (remember that every fold has a chunk of
+data it uses to test the fit). For simplicity, let’s use accuracy:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fits</span> <span class="op">&lt;-</span> <span class="fu">fit_resamples</span><span class="op">(</span></span>
 <span>  <span class="va">wf</span>,</span>
 <span>  <span class="va">folds</span>,</span>
-<span>  metrics <span class="op">=</span> <span class="fu">metric_set</span><span class="op">(</span><span class="va">accuracy</span><span class="op">)</span> <span class="co"># How should we measure how good the fit is?</span></span>
+<span>  metrics <span class="op">=</span> <span class="fu">metric_set</span><span class="op">(</span><span class="va">accuracy</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; 35/35 (100%) genes in centroids found in `new_data`</span></span>
 <span><span class="co">#&gt; 35/35 (100%) genes in centroids found in `new_data`</span></span>
 <span><span class="co">#&gt; 35/35 (100%) genes in centroids found in `new_data`</span></span>
 <span><span class="co">#&gt; 35/35 (100%) genes in centroids found in `new_data`</span></span>
-<span><span class="co">#&gt; 35/35 (100%) genes in centroids found in `new_data`</span></span></code></pre></div>
+<span><span class="co">#&gt; 35/35 (100%) genes in centroids found in `new_data`</span></span>
+<span><span class="va">fits</span></span>
+<span><span class="co">#&gt; # Resampling results</span></span>
+<span><span class="co">#&gt; # 5-fold cross-validation using stratification </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 4</span></span></span>
+<span><span class="co">#&gt;   splits           id    .metrics         .notes          </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> <span style="color: #949494;">&lt;split [193/51]&gt;</span> Fold1 <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [0 × 3]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> <span style="color: #949494;">&lt;split [193/51]&gt;</span> Fold2 <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [0 × 3]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> <span style="color: #949494;">&lt;split [195/49]&gt;</span> Fold3 <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [0 × 3]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> <span style="color: #949494;">&lt;split [197/47]&gt;</span> Fold4 <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [0 × 3]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> <span style="color: #949494;">&lt;split [198/46]&gt;</span> Fold5 <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [0 × 3]&gt;</span></span></span></code></pre></div>
 <p>We can then extract our accuracy metrics by using
 <code>collect_metrics</code>, which roots around in each of our fits and
 helpfully extracts the metrics, aggregates them, and calculated the
@@ -273,18 +335,18 @@ testing data:</p>
 <span><span class="co">#&gt;   .metric  .estimator .estimate</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> accuracy multiclass     0.734</span></span></code></pre></div>
-<p>Note that our testing data accuracy approximates the training data
-accuracy.</p>
+<p>Note that our testing data accuracy (%) approximates the training
+data accuracy (74%).</p>
 </div>
 <div class="section level3">
 <h3 id="tuning-hyperparameters-with-tune">Tuning hyperparameters with <code>tune</code><a class="anchor" aria-label="anchor" href="#tuning-hyperparameters-with-tune"></a>
 </h3>
-<p>So now we at least have <em>some</em> measure of how good our model
+<p>Now we at least have <em>some</em> measure of how good our model
 fits, but could it be better with more genes? Could we get away with
 fewer? Running the same command over and over again with different
 numbers is a drag - fortunately, there’s yet another beautiful package
 to help us: <code>tune</code>.</p>
-<p>To use <code>tune</code>, we need to respecify our model to let
+<p>To use <code>tune</code>, we need to re-specify our model to let
 <code>tune</code> know what parameters we want to tune:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tune_mod</span> <span class="op">&lt;-</span> <span class="fu">discrim_linear</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -301,7 +363,22 @@ to help us: <code>tune</code>.</p>
 <p>We then have to specify a range of values of <code>active</code> to
 try:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>active <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span>from <span class="op">=</span> <span class="fl">1</span>, to <span class="op">=</span> <span class="fl">50</span>, by <span class="op">=</span> <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>active <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span>from <span class="op">=</span> <span class="fl">1</span>, to <span class="op">=</span> <span class="fl">50</span>, by <span class="op">=</span> <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">values</span></span>
+<span><span class="co">#&gt;    active</span></span>
+<span><span class="co">#&gt; 1       1</span></span>
+<span><span class="co">#&gt; 2       5</span></span>
+<span><span class="co">#&gt; 3       9</span></span>
+<span><span class="co">#&gt; 4      13</span></span>
+<span><span class="co">#&gt; 5      17</span></span>
+<span><span class="co">#&gt; 6      21</span></span>
+<span><span class="co">#&gt; 7      25</span></span>
+<span><span class="co">#&gt; 8      29</span></span>
+<span><span class="co">#&gt; 9      33</span></span>
+<span><span class="co">#&gt; 10     37</span></span>
+<span><span class="co">#&gt; 11     41</span></span>
+<span><span class="co">#&gt; 12     45</span></span>
+<span><span class="co">#&gt; 13     49</span></span></code></pre></div>
 <p>We can then fit our <code>folds</code> using the spread of values we
 chose:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
@@ -311,7 +388,18 @@ chose:</p>
 <span>  <span class="va">folds</span>,</span>
 <span>  metrics <span class="op">=</span> <span class="fu">metric_set</span><span class="op">(</span><span class="va">accuracy</span><span class="op">)</span>,</span>
 <span>  grid <span class="op">=</span> <span class="va">values</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span><span class="va">tuned</span></span>
+<span><span class="co">#&gt; # Tuning results</span></span>
+<span><span class="co">#&gt; # 5-fold cross-validation using stratification </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 4</span></span></span>
+<span><span class="co">#&gt;   splits           id    .metrics          .notes          </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> <span style="color: #949494;">&lt;split [193/51]&gt;</span> Fold1 <span style="color: #949494;">&lt;tibble [13 × 5]&gt;</span> <span style="color: #949494;">&lt;tibble [0 × 3]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> <span style="color: #949494;">&lt;split [193/51]&gt;</span> Fold2 <span style="color: #949494;">&lt;tibble [13 × 5]&gt;</span> <span style="color: #949494;">&lt;tibble [0 × 3]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> <span style="color: #949494;">&lt;split [195/49]&gt;</span> Fold3 <span style="color: #949494;">&lt;tibble [13 × 5]&gt;</span> <span style="color: #949494;">&lt;tibble [0 × 3]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> <span style="color: #949494;">&lt;split [197/47]&gt;</span> Fold4 <span style="color: #949494;">&lt;tibble [13 × 5]&gt;</span> <span style="color: #949494;">&lt;tibble [0 × 3]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> <span style="color: #949494;">&lt;split [198/46]&gt;</span> Fold5 <span style="color: #949494;">&lt;tibble [13 × 5]&gt;</span> <span style="color: #949494;">&lt;tibble [0 × 3]&gt;</span></span></span></code></pre></div>
 <p>As before, we can collect our metrics - this time, however, we have a
 summary of metrics for each of values for <code>active</code>:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
@@ -344,10 +432,12 @@ summary of metrics for each of values for <code>active</code>:</p>
 choose 20 genes for a nice round number:</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">final_fit_tuned</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clanc.html">clanc</a></span><span class="op">(</span><span class="va">class</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">train</span>, active <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
-<span><span class="va">preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">final_fit_tuned</span>, new_data <span class="op">=</span> <span class="va">test</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span> <span class="co"># Use it to predict the (known) classes of our test data</span></span>
+<span><span class="co"># Use it to predict the (known) classes of our test data:</span></span>
+<span><span class="va">preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">final_fit_tuned</span>, new_data <span class="op">=</span> <span class="va">test</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 140/140 (100%) genes in centroids found in `new_data`</span></span>
 <span><span class="va">w_preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">preds</span>, <span class="va">test</span><span class="op">)</span></span>
-<span><span class="va">metric</span> <span class="op">&lt;-</span> <span class="fu">accuracy</span><span class="op">(</span><span class="va">w_preds</span>, <span class="va">class</span>, <span class="va">.pred_class</span><span class="op">)</span> <span class="co"># Compare known class vs predicted class</span></span>
+<span><span class="co"># Compare known class vs predicted class:</span></span>
+<span><span class="va">metric</span> <span class="op">&lt;-</span> <span class="fu">accuracy</span><span class="op">(</span><span class="va">w_preds</span>, <span class="va">class</span>, <span class="va">.pred_class</span><span class="op">)</span></span>
 <span><span class="va">metric</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 3</span></span></span>
 <span><span class="co">#&gt;   .metric  .estimator .estimate</span></span>
