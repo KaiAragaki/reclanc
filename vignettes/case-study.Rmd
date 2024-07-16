@@ -1,0 +1,292 @@
+---
+title: "case-study"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{case-study}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, message = FALSE}
+library(reclanc)
+library(aws.s3)
+library(Biobase)
+```
+
+# Introduction
+
+Let's consider a relatively full-featured, practical use case for ClaNC.
+
+Let's start with the fitting procedure. We first need gene expression data.
+
+# Data
+
+The data I'm using is from [Sjödahl et al. (2012)](https://pubmed.ncbi.nlm.nih.gov/22553347/). It contains RNA expression from 308 bladder cancer tumors. 
+
+```{r}
+lund <- s3readRDS("lund.rds", "reclanc-lund", region = "us-east-2")
+lund
+```
+
+In their paper, they used the transcriptional data to classify the tumors into several molecular subtypes (MS). 
+
+```{r}
+table(lund$molecular_subtype)
+```
+
+# Fitting
+
+## A simple fit
+
+We'd like to apply this subtype framework to other datasets. Our first goal is to generate centroids.
+
+Before we can begin, we need to convert our outcomes to factors. In this case, our outcomes are the molecular subtypes called by Sjödahl et al.
+
+```{r}
+lund$molecular_subtype <- factor(lund$molecular_subtype)
+```
+
+In its simplest form, since `clanc` accepts `ExpressionSet` objects, we could do the following and be done with it:
+
+```{r}
+simple_centroids <- clanc(lund, classes = "molecular_subtype", active = 5)
+head(simple_centroids$centroids)
+```
+
+## Setting the stage for more elaborate analyses
+
+For the next few sections, we're going to leverage the `tidymodels` collection of packages. In order to ease into that, I'll show you how to do the same analysis, but with packages from `tidymodels`.
+
+```{r, message = FALSE}
+library(tidymodels)
+```
+
+Many `tidymodels` workflows begin with a *model specification*. The rationale behind this is to separate the *model specification* step from the *model fitting* step (whereas in base R, they generally all happen at once).
+
+We specify our model like this:
+
+```{r}
+mod <- discrim_linear() |>
+  set_engine(
+    engine = "clanc",
+    active = 5
+  )
+```
+
+This `mod` doesn't do anything - and that's kind of the point: it only specifies the model we will later fit with, but doesn't do any fitting itself.
+
+We also need to wrangle our data a bit to be in a 'wide' format - fortunately that's quite simple:
+
+```{r}
+wrangled <- data.frame(class = lund$molecular_subtype, t(exprs(lund)))
+head(wrangled[1:5])
+```
+
+Finally, we specify a formula for fitting the model. This uses the `recipes` package from tidymodels. While this is a delightful package that can help you preprocess your data, it's out of the scope of this vignette. Instead, just think of it as a way to specify a formula.
+
+```{r}
+recipe <- recipe(class ~ ., wrangled) # Note that the recipe requires 'template data'
+```
+
+We can bundle our model specification (`mod`) and our preprocessing steps (`recipe`, which is just a formula) into a `workflow`:
+
+```{r}
+wf <- workflow() |>
+  add_recipe(recipe) |>
+  add_model(mod)
+wf
+```
+
+Now we can fit our model:
+
+```{r}
+tidymodels_fit <- fit(wf, data = wrangled)
+head(tidymodels_fit$fit$centroids)
+```
+
+## Measuring fit accuracy with cross-validation
+
+Now that we've dialed in to the `tidymodels` framework, we can do a lot of elaborate things with ease. One of our concerns is whether 5 active genes was a good choice (`active = 5`). A somewhat simple way to determine how good our choice of 5 genes is to use [cross-validation](https://en.wikipedia.org/wiki/Cross-validation_(statistics)). Cross-validation allows us to test how good our fit, without having to spend our test data. Speaking of which, let's split our data into training and testing data right now. To do this, we're going to use the lovely `rsample` package.
+
+```{r}
+set.seed(123)
+splits <- initial_split(wrangled, prop = 0.8, strata = class)
+train <- training(splits)
+test <- testing(splits)
+```
+
+`train` and `test` are just subsets of the original data, containing 80% and 20% of the original data (respectively). It also tries to maintain the relative proportions of each of the classes within each of the datasets (because we set `strata = class`):
+
+```{r}
+round(prop.table(table(train$class)), 2)
+```
+
+```{r}
+round(prop.table(table(test$class)), 2)
+```
+
+Creating folds for crossfold validation is nearly the same:
+
+```{r}
+folds <- vfold_cv(train, v = 5, strata = class)
+```
+
+We can reuse our workflow `wf`:
+
+```{r}
+fits <- fit_resamples(
+  wf,
+  folds,
+  metrics = metric_set(accuracy) # How should we measure how good the fit is?
+)
+```
+
+We can then extract our accuracy metrics by using `collect_metrics`, which roots around in each of our fits and helpfully extracts the metrics, aggregates them, and calculated the standard error:
+
+```{r}
+metrics <- collect_metrics(fits)
+metrics
+```
+
+Our model has an accuracy of about `r round(metrics$mean*100)`%. Applying this model to our testing data:
+
+```{r}
+final_fit <- clanc(class ~ ., train, active = 5) # Fit a model using *all* of our training data
+preds <- predict(final_fit, new_data = test, type = "class") # Use it to predict the (known) classes of our test data
+w_preds <- cbind(preds, test)
+metric <- accuracy(w_preds, class, .pred_class) # Compare known class vs predicted class
+metric
+```
+
+Note that our testing data accuracy approximates the training data accuracy.
+
+## Tuning hyperparameters with `tune`
+
+So now we at least have *some* measure of how good our model fits, but could it be better with more genes? Could we get away with fewer? Running the same command over and over again with different numbers is a drag - fortunately, there's yet another beautiful package to help us: `tune`.
+
+To use `tune`, we need to respecify our model to let `tune` know what parameters we want to tune:
+
+```{r}
+tune_mod <- discrim_linear() |>
+  set_engine(
+    engine = "clanc",
+    active = tune()
+  )
+```
+
+We could update our previous workflow using `update_model`, but let's just declare a new one:
+
+```{r}
+tune_wf <- workflow() |>
+  add_recipe(recipe) |>
+  add_model(tune_mod)
+```
+
+We then have to specify a range of values of `active` to try:
+
+```{r}
+values <- data.frame(active = seq(from = 1, to = 50, by = 4))
+```
+
+We can then fit our `folds` using the spread of values we chose:
+
+```{r, message = FALSE}
+# This is going to take some time, since we're fitting 5 folds 13 times each.
+tuned <- tune_grid(
+  tune_wf,
+  folds,
+  metrics = metric_set(accuracy),
+  grid = values
+)
+```
+
+As before, we can collect our metrics - this time, however, we have a summary of metrics for each of values for `active`:
+
+```{r}
+tuned_metrics <- collect_metrics(tuned)
+tuned_metrics
+```
+
+Or graphically:
+
+```{r}
+ggplot(tuned_metrics, aes(active, mean)) +
+  geom_line() +
+  coord_cartesian(ylim = c(0, 1)) +
+  labs(x = "Number Active Genes", y = "Accuracy")
+```
+
+It looks like we read maximal accuracy at around 21 genes - let's choose 20 genes for a nice round number:
+
+```{r}
+final_fit_tuned <- clanc(class ~ ., data = train, active = 20)
+preds <- predict(final_fit_tuned, new_data = test, type = "class") # Use it to predict the (known) classes of our test data
+w_preds <- cbind(preds, test)
+metric <- accuracy(w_preds, class, .pred_class) # Compare known class vs predicted class
+metric
+```
+
+It looks like our accuracy is a little better now that we've chosen an optimal number of active genes.
+
+
+# Predicting
+
+Now we want to apply our classifier to new data. Our second dataset is [RNAseq data from 30 bladder cancer cell lines](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE97768):
+
+```{r, message = FALSE}
+library(cellebrate)
+cell_rna
+```
+
+Predicting is incredibly simple. Since we're using a different sequencing method (RNAseq vs array-based sequencing), it probably makes sense to use a correlation based classification rather than the original distance-based metric used in the original ClaNC package. We can do that by specifying `type = "numeric"` and then whatever correlation method we prefer. 
+
+```{r}
+cell_preds <- predict(
+  final_fit_tuned,
+  cell_rna,
+  assay = 2,
+  type = "numeric",
+  method = "spearman"
+)
+
+out <- cbind(colData(cell_rna), cell_preds) |>
+  as_tibble()
+
+out
+```
+
+```{r, fig.width = 10, fig.height = 7}
+plotting_data <- out |>
+  pivot_longer(cols = starts_with(".pred"))
+
+plotting_data |>
+  ggplot(aes(cell, value, color = name)) +
+  geom_point() +
+  facet_grid(~clade, scales = "free_x", space = "free_x")
+```
+
+In the Sjödahl paper, the seven subtypes were simplified into five subtypes by merging some of the two that had similar biological pathways activated. To ease interpretation, we can do that too:
+
+```{r}
+table <- plotting_data |>
+  summarize(winner = name[which.max(value)], .by = c(cell, clade)) |>
+  mutate(
+    five = case_when(
+      winner %in% c(".pred_MS1a", ".pred_MS1b") ~ "Urobasal A",
+      winner %in% c(".pred_MS2a.1", ".pred_MS2a.2") ~ "Genomically unstable",
+      winner == ".pred_MS2b.1" ~ "Infiltrated",
+      winner == ".pred_MS2b2.1" ~ "Uro-B",
+      winner == ".pred_MS2b2.2" ~ "SCC-like"
+    )
+  ) |>
+  relocate(cell, five, clade)
+
+print(table, n = 30)
+```

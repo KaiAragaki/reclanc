@@ -52,17 +52,17 @@ predict_dist_multi <- function(dists) {
 
 # dists: col = sample, row = class, value = dist
 
-wrangle_data <- function(data) {
-  if (inherits(data, "SummarizedExperiment")) return(wrangle_data_se(data))
+wrangle_data <- function(data, assay) {
+  if (inherits(data, "SummarizedExperiment")) return(wrangle_data_se(data, assay))
   if (inherits(data, "data.frame")) return(wrangle_data_df(data))
   if (inherits(data, "matrix")) return(wrangle_data_matrix(data))
   if (inherits(data, "ExpressionSet")) return(wrangle_data_es(data))
   cli::cli_abort("Unable to predict object of type {class(data)}")
 }
 
-wrangle_data_se <- function(data) {
-  # Should assay number be an optional arg?
-  data <- SummarizedExperiment::assay(data)
+wrangle_data_se <- function(data, assay) {
+  assay <- ifelse(is.null(assay), 1, assay)
+  data <- SummarizedExperiment::assay(data, assay)
   t(data)
 }
 

@@ -11,6 +11,9 @@
 #'
 #' @param method If `type` is `numeric`, the method of correlation
 #'
+#' @param assay If `object` inherits `SummarizedExperiment`, the index of the
+#'   assay.
+#'
 #' @param ... Not used, but required for extensibility.
 #'
 #' @return
@@ -19,8 +22,8 @@
 #' to be the same as the number of rows in `new_data`.
 #'
 #' @export
-predict.clanc <- function(object, new_data, type, ...) {
-  new_data <- wrangle_data(new_data)
+predict.clanc <- function(object, new_data, type, assay = NULL, ...) {
+  new_data <- wrangle_data(new_data, assay)
   forged <- custom_forge(new_data, object$blueprint)
   rlang::arg_match(type, valid_clanc_predict_types())
   predict_clanc_bridge(type, object, forged$predictors, ...)
