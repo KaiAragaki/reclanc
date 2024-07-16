@@ -33,7 +33,8 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/using-reclanc.html">using-reclanc</a></li>
+<li><a class="dropdown-item" href="../articles/case-study.html">case-study</a></li>
+    <li><a class="dropdown-item" href="../articles/using-reclanc.html">using-reclanc</a></li>
   </ul>
 </li>
       </ul>
@@ -86,7 +87,7 @@ algorithm.</p>
 <p><code>reclanc</code> provides some synthetic expression data that we
 can work with:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">synthetic_expression</span>, <span class="va">head</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">synthetic_expression</span>, <span class="va">head</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; $expression</span></span>
 <span><span class="co">#&gt;        sample1  sample2  sample3  sample4  sample5  sample6  sample7  sample8</span></span>
 <span><span class="co">#&gt; gene1 8.097529 7.119188 7.304400 7.554689 7.953206 7.714925 7.512700 8.597547</span></span>
@@ -127,9 +128,9 @@ columns, together, in a single <code>data.frame</code>.</p>
 <h4 id="formula">Formula<a class="anchor" aria-label="anchor" href="#formula"></a>
 </h4>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">form_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">form_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">cbind</a></span><span class="op">(</span></span>
 <span>  class <span class="op">=</span> <span class="va">synthetic_expression</span><span class="op">$</span><span class="va">classes</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">synthetic_expression</span><span class="op">$</span><span class="va">expression</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">synthetic_expression</span><span class="op">$</span><span class="va">expression</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">form_data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;         class    gene1    gene2    gene3    gene4</span></span>
