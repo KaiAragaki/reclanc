@@ -22,11 +22,16 @@ library(Biobase)
 
 # Introduction
 
-Let's consider a relatively full-featured, practical use case for ClaNC.
+Let's consider a relatively full-featured, practical use case for `reclanc`. In this vignette, we'll go over the basics of fitting models, as well as how to leverage `tidymodels` to do more elaborate things like resampling and tuning hyperparameters. We'll fit a final model, then use that to predict subtypes of an entirely new dataset.
+
+This vignette tries to assume very little knowledge about machine learning or `tidymodels`.
+
+
+# Fitting
+
+## A simple fit
 
 Let's start with the fitting procedure. We first need gene expression data.
-
-# Data
 
 The data I'm using is from [Sjödahl et al. (2012)](https://pubmed.ncbi.nlm.nih.gov/22553347/). It contains RNA expression from 308 bladder cancer tumors. 
 
@@ -35,19 +40,13 @@ lund <- s3readRDS("lund.rds", "reclanc-lund", region = "us-east-2")
 lund
 ```
 
-In their paper, they used the transcriptional data to classify the tumors into several molecular subtypes (MS). 
+In their paper, Sjödahl et al. used the transcriptional data to classify the tumors into seven molecular subtypes (MS):
 
 ```{r}
 table(lund$molecular_subtype)
 ```
 
-# Fitting
-
-## A simple fit
-
-We'd like to apply this subtype framework to other datasets. Our first goal is to generate centroids.
-
-Before we can begin, we need to convert our outcomes to factors. In this case, our outcomes are the molecular subtypes called by Sjödahl et al.
+We'd like to apply this subtype framework to other datasets. To do this, we first need to generate centroids. Before we can begin, though, we need to convert our outcomes to factors. In this case, our outcomes are the molecular subtypes:
 
 ```{r}
 lund$molecular_subtype <- factor(lund$molecular_subtype)
@@ -60,36 +59,40 @@ simple_centroids <- clanc(lund, classes = "molecular_subtype", active = 5)
 head(simple_centroids$centroids)
 ```
 
+The problem with this method, though, is we have no idea if this is a good fit or not. `active` is an argument that specifies the number of genes that are used as distinguishing features for a given class. In this case, each class will find 5 genes that have expression patterns peculiar to that given molecular subtype, and each subtype will have 7 (the total number of subtypes) x 5 (number of active genes) = 35 genes in it (see my [blog post](https://kai.rbind.io/posts/projects-reclanc/) or - better yet - [the original paper](http://www.ncbi.nlm.nih.gov/pubmed/16174683) for more details). Could we have gotten a better fit with more genes? Are we selecting more genes than we need? How would we know?
+
 ## Setting the stage for more elaborate analyses
 
-For the next few sections, we're going to leverage the `tidymodels` collection of packages. In order to ease into that, I'll show you how to do the same analysis, but with packages from `tidymodels`.
+Before we can get started on tackling these larger questions, let's take a brief detour to the land of [`tidymodels`](https://www.tidymodels.org/). `tidymodels` is a collection of packages that make running and tuning algorithms like this much less painful and much more standardized.
+
+In order to leverage `tidymodels`, we need to buy-in to their data structures.
+
+(Aside: I don't mean to make the buy-in sound begrudging. When I say need, I really mean it: we're going to be specifying very long formulas, which for some reason R really, *really* hates. Emil Hvitfeldt recently (at time of writing) has [allowed `tidymodels` to handle long formulas gracefully](https://github.com/tidymodels/recipes/pull/1283), so using `tidymodels` infrastructure is a gift, not a chore.)
 
 ```{r, message = FALSE}
 library(tidymodels)
 ```
 
-Many `tidymodels` workflows begin with a *model specification*. The rationale behind this is to separate the *model specification* step from the *model fitting* step (whereas in base R, they generally all happen at once).
-
-We specify our model like this:
+Many `tidymodels` workflows begin with a *model specification*. The rationale behind this is to separate the *model specification* step from the *model fitting* step (whereas in base R, they generally all happen at once). `reclanc` makes it easy to specify a model by adding a custom engine to `parsnip::discrim_linear`, so specifying a model looks like this:
 
 ```{r}
 mod <- discrim_linear() |>
   set_engine(
-    engine = "clanc",
+    engine = "clanc", # Note: "clanc", not "reclanc"
     active = 5
   )
 ```
 
-This `mod` doesn't do anything - and that's kind of the point: it only specifies the model we will later fit with, but doesn't do any fitting itself.
+This `mod` doesn't do anything - and that's kind of the point: it only specifies the model we will later fit with, but doesn't do any fitting itself. This allows us to reuse the specification across our code.
 
-We also need to wrangle our data a bit to be in a 'wide' format - fortunately that's quite simple:
+The next step is to wrangle our data a bit to be in a 'wide' format, where all columns are outcomes (classes) and predictors (genes), and all rows are observations (samples):
 
 ```{r}
 wrangled <- data.frame(class = lund$molecular_subtype, t(exprs(lund)))
 head(wrangled[1:5])
 ```
 
-Finally, we specify a formula for fitting the model. This uses the `recipes` package from tidymodels. While this is a delightful package that can help you preprocess your data, it's out of the scope of this vignette. Instead, just think of it as a way to specify a formula.
+Finally, we specify a formula for fitting the model. This uses the `recipes` package from `tidymodels`. While this is a delightful package that can help you preprocess your data, it's out of the scope of this vignette. Instead, just think of it as a way to specify a formula that keeps R from blowing up:
 
 ```{r}
 recipe <- recipe(class ~ ., wrangled) # Note that the recipe requires 'template data'
@@ -111,9 +114,15 @@ tidymodels_fit <- fit(wf, data = wrangled)
 head(tidymodels_fit$fit$centroids)
 ```
 
+You'll notice that our results are the same as what we saw previously, demonstrating that while we're using `tidymodels` rather than base R, we're still doing the same thing.
+
 ## Measuring fit accuracy with cross-validation
 
-Now that we've dialed in to the `tidymodels` framework, we can do a lot of elaborate things with ease. One of our concerns is whether 5 active genes was a good choice (`active = 5`). A somewhat simple way to determine how good our choice of 5 genes is to use [cross-validation](https://en.wikipedia.org/wiki/Cross-validation_(statistics)). Cross-validation allows us to test how good our fit, without having to spend our test data. Speaking of which, let's split our data into training and testing data right now. To do this, we're going to use the lovely `rsample` package.
+Now that we've dialed in to the `tidymodels` framework, we can do a lot of elaborate things with ease. One of our concerns is whether 5 active genes was a good choice (`active = 5`). A somewhat simple way to determine how good our choice of 5 genes is to use [cross-validation](https://en.wikipedia.org/wiki/Cross-validation_(statistics)). Cross-validation allows us to test how good our fit is by training our model on, say, 80% of our data, and testing it on the rest (see the Wikipedia diagram of a k-fold cross validation). This allows us to get a measure of how good our fit is, without having to break out our actual test data - which in general should only be used when we're ready to finalize our model.
+
+Speaking of test data, let's go ahead and split that off now. We'll lock our test data away and only use it once we've fit our final model. Until then, we'll use cross validation to assess how good the fit is, essentially using our training data as its own testing data.
+
+Of course, `tidymodels` makes this easy too, by using `rsample::initial_split`:
 
 ```{r}
 set.seed(123)
@@ -132,20 +141,22 @@ round(prop.table(table(train$class)), 2)
 round(prop.table(table(test$class)), 2)
 ```
 
-Creating folds for crossfold validation is nearly the same:
+Creating folds for cross validation is nearly the same as `initial_split`:
 
 ```{r}
 folds <- vfold_cv(train, v = 5, strata = class)
+folds
 ```
 
-We can reuse our workflow `wf`:
+We can reuse our workflow `wf`, which contains our model and formula. The only difference is that we use `fit_resamples`, and we specify a metric we want to use to measure how good our fit is (remember that every fold has a chunk of data it uses to test the fit). For simplicity, let's use accuracy:
 
 ```{r}
 fits <- fit_resamples(
   wf,
   folds,
-  metrics = metric_set(accuracy) # How should we measure how good the fit is?
+  metrics = metric_set(accuracy)
 )
+fits
 ```
 
 We can then extract our accuracy metrics by using `collect_metrics`, which roots around in each of our fits and helpfully extracts the metrics, aggregates them, and calculated the standard error:
@@ -165,13 +176,13 @@ metric <- accuracy(w_preds, class, .pred_class) # Compare known class vs predict
 metric
 ```
 
-Note that our testing data accuracy approximates the training data accuracy.
+Note that our testing data accuracy (`r round(metric$mean*100)`%) approximates the training data accuracy (`r round(metrics$mean*100)`%).
 
 ## Tuning hyperparameters with `tune`
 
-So now we at least have *some* measure of how good our model fits, but could it be better with more genes? Could we get away with fewer? Running the same command over and over again with different numbers is a drag - fortunately, there's yet another beautiful package to help us: `tune`.
+Now we at least have *some* measure of how good our model fits, but could it be better with more genes? Could we get away with fewer? Running the same command over and over again with different numbers is a drag - fortunately, there's yet another beautiful package to help us: `tune`.
 
-To use `tune`, we need to respecify our model to let `tune` know what parameters we want to tune:
+To use `tune`, we need to re-specify our model to let `tune` know what parameters we want to tune:
 
 ```{r}
 tune_mod <- discrim_linear() |>
@@ -193,6 +204,7 @@ We then have to specify a range of values of `active` to try:
 
 ```{r}
 values <- data.frame(active = seq(from = 1, to = 50, by = 4))
+values
 ```
 
 We can then fit our `folds` using the spread of values we chose:
@@ -205,6 +217,7 @@ tuned <- tune_grid(
   metrics = metric_set(accuracy),
   grid = values
 )
+tuned
 ```
 
 As before, we can collect our metrics - this time, however, we have a summary of metrics for each of values for `active`:
@@ -227,14 +240,15 @@ It looks like we read maximal accuracy at around 21 genes - let's choose 20 gene
 
 ```{r}
 final_fit_tuned <- clanc(class ~ ., data = train, active = 20)
-preds <- predict(final_fit_tuned, new_data = test, type = "class") # Use it to predict the (known) classes of our test data
+# Use it to predict the (known) classes of our test data:
+preds <- predict(final_fit_tuned, new_data = test, type = "class")
 w_preds <- cbind(preds, test)
-metric <- accuracy(w_preds, class, .pred_class) # Compare known class vs predicted class
+# Compare known class vs predicted class:
+metric <- accuracy(w_preds, class, .pred_class)
 metric
 ```
 
 It looks like our accuracy is a little better now that we've chosen an optimal number of active genes.
-
 
 # Predicting
 
