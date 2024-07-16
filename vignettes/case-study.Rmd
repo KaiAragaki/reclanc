@@ -1,0 +1,30 @@
+---
+title: "case-study"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{case-study}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(reclanc)
+library(aws.s3)
+```
+
+# Introduction
+
+Let's consider a relatively full-featured, practical use case for ClaNC.
+
+Let's start with the fitting procedure. We first need gene expression data.
+
+```r
+lund <- s3readRDS("lund.rds", "reclanc-lund", region = "us-east-2")
+```
