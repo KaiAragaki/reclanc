@@ -23,10 +23,10 @@ process_priors <- function(processed, active, priors, verbosity, ...) {
   if (any(priors < 0)) {
     cli::cli_abort("All priors must be positive")
   }
-  if (sum(priors) > 1) {
+  if (sum(priors) > 1.01) {
     cli::cli_abort("Sum of priors ({sum(priors)}) is greater than 1")
   }
-  if (sum(priors) < 1 && verbosity %in% c("all", "warn")) {
+  if (sum(priors) < 0.99 && verbosity %in% c("all", "warn")) {
     cli::cli_warn("Sum of priors ({sum(priors)}) is less than 1")
   }
   priors
