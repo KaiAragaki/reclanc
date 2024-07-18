@@ -322,6 +322,7 @@ clanc_bridge <- function(processed, active, priors, verbosity, ...) {
   # NOTE What happens if classes supplied upstream are not the proper length?
   # That is, the length of the vector is shorter than the length of the data?
   # (not necessarily n_levels deficiency)
+  verbosity <- rlang::arg_match(verbosity, c("all", "warn", "none"))
   active <- process_active(processed, active, priors, ...)
   priors <- process_priors(processed, active, priors, verbosity, ...)
   validate_classes(processed, active, priors)

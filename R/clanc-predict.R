@@ -28,6 +28,7 @@ predict.clanc <- function(object,
                           assay = NULL,
                           verbosity = c("all", "warn", "none"),
                           ...) {
+  verbosity <- rlang::arg_match(verbosity)
   new_data <- wrangle_data(new_data, assay)
   forged <- custom_forge(new_data, object$blueprint, verbosity)
   rlang::arg_match(type, valid_clanc_predict_types())
