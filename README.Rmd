@@ -22,6 +22,14 @@ reclanc is a revival of [ClaNC (Classification of microarrays to nearest centroi
 
 Since the source has been lost (at least to my knowledge), the code comes from [here](https://github.com/naikai/sake/blob/master/R/clanc.R) with heavy modification.
 
+reclanc is a nearest-centroid classifier for expression data. It tends to be a little more sensitive and accurate than similar models like PAM.
+
+Besides its mere existence, reclanc differs slightly from the original ClaNC package in a few ways:
+
+- reclanc supports a wide variety of inputs (`data.frame`, `matrix`, `formula`,  `recipe`, `ExpressionSet`, and `SummarizedExperiment`)
+- reclanc plays nicely with [tidymodels](https://www.tidymodels.org/), and offloads things like making folds to `rsample` and tuning to `tune` (see [this vignette](https://kaiaragaki.github.io/reclanc/articles/case-study.html) for how to leverage tidymodels with reclanc). 
+- Provides a prediction method based on correlation, rather than distance - useful for predicting classes from data from different sequencing modalities
+
 ## Installation
 
 You can install the development version of reclanc like so:
@@ -31,6 +39,25 @@ You can install the development version of reclanc like so:
 pak::pak("KaiAragaki/reclanc")
 ```
 
+## How to use it
+
+```{r}
+library(reclanc)
+lapply(synthetic_expression, head) # dummy data
+```
+
+```{r}
+centroids <- clanc(
+  synthetic_expression$expression,
+  classes = synthetic_expression$classes,
+  active = 5
+)
+centroids
+```
+
+For information on basic usage, see [this](https://kaiaragaki.github.io/reclanc/articles/using-reclanc.html) vignette. For a case study, as well as how to optimize the `active` parameter, see [this](https://kaiaragaki.github.io/reclanc/articles/case-study.html) vignette.
+
+
 ## How it works
 
-You can find a more in-depth and statistically rigorous definition of how this algorithm works [here](https://doi.org/10.1093/bioinformatics/bti681).
+You can find a gentle introduction to how reclanc works [here](https://kai.rbind.io/posts/projects-reclanc/) and a more in-depth and statistically rigorous definition of how this algorithm works in the  [original paper](https://doi.org/10.1093/bioinformatics/bti681).
