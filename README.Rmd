@@ -61,3 +61,9 @@ For information on basic usage, see [this](https://kaiaragaki.github.io/reclanc/
 ## How it works
 
 You can find a gentle introduction to how reclanc works [here](https://kai.rbind.io/posts/projects-reclanc/) and a more in-depth and statistically rigorous definition of how this algorithm works in the  [original paper](https://doi.org/10.1093/bioinformatics/bti681).
+
+## Citation
+
+Citation for the original ClaNC paper:
+
+Alan R. Dabney, Classification of microarrays to nearest centroids, Bioinformatics, Volume 21, Issue 22, November 2005, Pages 4148–4154, https://doi.org/10.1093/bioinformatics/bti681
