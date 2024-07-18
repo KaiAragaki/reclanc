@@ -95,7 +95,8 @@ head(wrangled[1:5])
 Finally, we specify a formula for fitting the model. This uses the `recipes` package from `tidymodels`. While this is a delightful package that can help you preprocess your data, it's out of the scope of this vignette. Instead, just think of it as a way to specify a formula that keeps R from blowing up:
 
 ```{r}
-recipe <- recipe(class ~ ., wrangled) # Note that the recipe requires 'template data'
+# Note that the recipe requires 'template data'
+recipe <- recipe(class ~ ., wrangled) 
 ```
 
 We can bundle our model specification (`mod`) and our preprocessing steps (`recipe`, which is just a formula) into a `workflow`:
@@ -169,10 +170,14 @@ metrics
 Our model has an accuracy of about `r round(metrics$mean*100)`%. Applying this model to our testing data:
 
 ```{r}
-final_fit <- clanc(class ~ ., train, active = 5) # Fit a model using *all* of our training data
-preds <- predict(final_fit, new_data = test, type = "class") # Use it to predict the (known) classes of our test data
+# Fit a model using *all* of our training data
+final_fit <- clanc(class ~ ., train, active = 5)
+
+# Use it to predict the (known) classes of our test data
+preds <- predict(final_fit, new_data = test, type = "class")
 w_preds <- cbind(preds, test)
-metric <- accuracy(w_preds, class, .pred_class) # Compare known class vs predicted class
+# Compare known class vs predicted class
+metric <- accuracy(w_preds, class, .pred_class)
 metric
 ```
 
