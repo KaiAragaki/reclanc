@@ -198,7 +198,8 @@ a delightful package that can help you preprocess your data, it’s out of
 the scope of this vignette. Instead, just think of it as a way to
 specify a formula that keeps R from blowing up:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">recipe</span> <span class="op">&lt;-</span> <span class="fu">recipe</span><span class="op">(</span><span class="va">class</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">wrangled</span><span class="op">)</span> <span class="co"># Note that the recipe requires 'template data'</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Note that the recipe requires 'template data'</span></span>
+<span><span class="va">recipe</span> <span class="op">&lt;-</span> <span class="fu">recipe</span><span class="op">(</span><span class="va">class</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">wrangled</span><span class="op">)</span> </span></code></pre></div>
 <p>We can bundle our model specification (<code>mod</code>) and our
 preprocessing steps (<code>recipe</code>, which is just a formula) into
 a <code>workflow</code>:</p>
@@ -325,11 +326,15 @@ standard error:</p>
 <p>Our model has an accuracy of about 74%. Applying this model to our
 testing data:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">final_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clanc.html">clanc</a></span><span class="op">(</span><span class="va">class</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">train</span>, active <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="co"># Fit a model using *all* of our training data</span></span>
-<span><span class="va">preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">final_fit</span>, new_data <span class="op">=</span> <span class="va">test</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span> <span class="co"># Use it to predict the (known) classes of our test data</span></span>
+<code class="sourceCode R"><span><span class="co"># Fit a model using *all* of our training data</span></span>
+<span><span class="va">final_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clanc.html">clanc</a></span><span class="op">(</span><span class="va">class</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">train</span>, active <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Use it to predict the (known) classes of our test data</span></span>
+<span><span class="va">preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">final_fit</span>, new_data <span class="op">=</span> <span class="va">test</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 35/35 (100%) genes in centroids found in `new_data`</span></span>
 <span><span class="va">w_preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">preds</span>, <span class="va">test</span><span class="op">)</span></span>
-<span><span class="va">metric</span> <span class="op">&lt;-</span> <span class="fu">accuracy</span><span class="op">(</span><span class="va">w_preds</span>, <span class="va">class</span>, <span class="va">.pred_class</span><span class="op">)</span> <span class="co"># Compare known class vs predicted class</span></span>
+<span><span class="co"># Compare known class vs predicted class</span></span>
+<span><span class="va">metric</span> <span class="op">&lt;-</span> <span class="fu">accuracy</span><span class="op">(</span><span class="va">w_preds</span>, <span class="va">class</span>, <span class="va">.pred_class</span><span class="op">)</span></span>
 <span><span class="va">metric</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 3</span></span></span>
 <span><span class="co">#&gt;   .metric  .estimator .estimate</span></span>
