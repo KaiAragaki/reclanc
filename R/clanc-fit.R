@@ -128,15 +128,6 @@
 #
 #' clanc(es, classes = "class", active = 5, priors = 0.5)
 #'
-#' # Different numbers of active genes per class:
-#' # TODO
-#'
-#' # Cross validation with `recipes`
-#' # TODO
-#'
-#' # Using `tune` to find optimal `active`
-#' # TODO
-#'
 #' @export
 clanc <- function(x, ...) {
   UseMethod("clanc")
