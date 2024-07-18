@@ -112,7 +112,7 @@ Now we can fit our model:
 
 ```{r}
 tidymodels_fit <- fit(wf, data = wrangled)
-head(tidymodels_fit$fit$centroids)
+head(tidymodels_fit$fit$fit)
 ```
 
 You'll notice that our results are the same as what we saw previously, demonstrating that while we're using `tidymodels` rather than base R, we're still doing the same thing.
