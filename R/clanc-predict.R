@@ -14,6 +14,9 @@
 #' @param assay If `object` inherits `SummarizedExperiment`, the index of the
 #'   assay.
 #'
+#' @param verbosity How noisy the function should be. If "warn", only warnings
+#'   will be emitted. If "none", neither warnings nor messages will be emitted.
+#'
 #' @param ... Not used, but required for extensibility.
 #'
 #' @return

@@ -27,6 +27,9 @@ Valid options are:
 \item{assay}{If \code{object} inherits \code{SummarizedExperiment}, the index of the
 assay.}
 
+\item{verbosity}{How noisy the function should be. If "warn", only warnings
+will be emitted. If "none", neither warnings nor messages will be emitted.}
+
 \item{...}{Not used, but required for extensibility.}
 
 \item{method}{If \code{type} is \code{numeric}, the method of correlation}
