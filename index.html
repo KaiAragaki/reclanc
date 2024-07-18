@@ -59,6 +59,13 @@
 <!-- badges: end -->
 <p>reclanc is a revival of <a href="https://doi.org/10.1093/bioinformatics/bti681" class="external-link">ClaNC (Classification of microarrays to nearest centroids), by Alan R. Dabney</a>.</p>
 <p>Since the source has been lost (at least to my knowledge), the code comes from <a href="https://github.com/naikai/sake/blob/master/R/clanc.R" class="external-link">here</a> with heavy modification.</p>
+<p>reclanc is a nearest-centroid classifier for expression data. It tends to be a little more sensitive and accurate than similar models like PAM.</p>
+<p>Besides its mere existence, reclanc differs slightly from the original ClaNC package in a few ways:</p>
+<ul>
+<li>reclanc supports a wide variety of inputs (<code>data.frame</code>, <code>matrix</code>, <code>formula</code>, <code>recipe</code>, <code>ExpressionSet</code>, and <code>SummarizedExperiment</code>)</li>
+<li>reclanc plays nicely with <a href="https://www.tidymodels.org/" class="external-link">tidymodels</a>, and offloads things like making folds to <code>rsample</code> and tuning to <code>tune</code> (see <a href="https://kaiaragaki.github.io/reclanc/articles/case-study.html">this vignette</a> for how to leverage tidymodels with reclanc).</li>
+<li>Provides a prediction method based on correlation, rather than distance - useful for predicting classes from data from different sequencing modalities</li>
+</ul>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -68,9 +75,66 @@
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"KaiAragaki/reclanc"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="how-to-use-it">How to use it<a class="anchor" aria-label="anchor" href="#how-to-use-it"></a>
+</h2>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/KaiAragaki/reclanc" class="external-link">reclanc</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">synthetic_expression</span>, <span class="va">head</span><span class="op">)</span> <span class="co"># dummy data</span></span>
+<span><span class="co">#&gt; $expression</span></span>
+<span><span class="co">#&gt;        sample1  sample2  sample3  sample4  sample5  sample6  sample7  sample8</span></span>
+<span><span class="co">#&gt; gene1 8.097529 7.119188 7.304400 7.554689 7.953206 7.714925 7.512700 8.597547</span></span>
+<span><span class="co">#&gt; gene2 8.641837 9.400416 8.500865 8.878687 8.318438 8.728683 7.812591 7.638167</span></span>
+<span><span class="co">#&gt; gene3 3.436236 4.317915 3.435193 3.515755 3.024976 4.762209 5.048956 2.006646</span></span>
+<span><span class="co">#&gt; gene4 4.368008 5.212750 4.618249 4.201365 3.195294 4.707750 5.126769 6.178658</span></span>
+<span><span class="co">#&gt; gene5 2.423974 3.563816 4.062362 2.163278 2.021435 2.813873 0.000000 4.652358</span></span>
+<span><span class="co">#&gt; gene6 5.371205 5.919809 4.366915 4.805534 4.834856 5.622157 3.883531 3.593082</span></span>
+<span><span class="co">#&gt;        sample9 sample10 sample11 sample12</span></span>
+<span><span class="co">#&gt; gene1 6.475641 7.648858 8.637526 7.345038</span></span>
+<span><span class="co">#&gt; gene2 8.110285 7.906104 7.424728 7.927039</span></span>
+<span><span class="co">#&gt; gene3 2.739211 3.111668 3.161077 4.306611</span></span>
+<span><span class="co">#&gt; gene4 5.170265 4.259578 5.872855 6.159023</span></span>
+<span><span class="co">#&gt; gene5 1.532242 3.399823 3.691250 1.932937</span></span>
+<span><span class="co">#&gt; gene6 4.246205 4.637316 3.575837 2.730452</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $classes</span></span>
+<span><span class="co">#&gt; [1] A A A A A A</span></span>
+<span><span class="co">#&gt; Levels: A B</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">centroids</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/clanc.html">clanc</a></span><span class="op">(</span></span>
+<span>  <span class="va">synthetic_expression</span><span class="op">$</span><span class="va">expression</span>,</span>
+<span>  classes <span class="op">=</span> <span class="va">synthetic_expression</span><span class="op">$</span><span class="va">classes</span>,</span>
+<span>  active <span class="op">=</span> <span class="fl">5</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">centroids</span></span>
+<span><span class="co">#&gt; &lt;clanc&gt; </span></span>
+<span><span class="co">#&gt; $centroids</span></span>
+<span><span class="co">#&gt;    class   gene expression pooled_sd active prior</span></span>
+<span><span class="co">#&gt; 1      A gene13   8.936462 0.3418472      5   0.5</span></span>
+<span><span class="co">#&gt; 2      A gene21   7.379940 0.5279636      5   0.5</span></span>
+<span><span class="co">#&gt; 3      A  gene2   8.744821 0.3147537      5   0.5</span></span>
+<span><span class="co">#&gt; 4      A gene74   4.028507 0.4940783      5   0.5</span></span>
+<span><span class="co">#&gt; 5      A gene41   4.328516 0.6317005      5   0.5</span></span>
+<span><span class="co">#&gt; 6      A gene66   6.124761 0.5883218      5   0.5</span></span>
+<span><span class="co">#&gt; 7      A gene24   4.307301 0.7214700      5   0.5</span></span>
+<span><span class="co">#&gt; 8      A gene95   6.288173 0.4462475      5   0.5</span></span>
+<span><span class="co">#&gt; 9      A gene94   7.777318 0.5375914      5   0.5</span></span>
+<span><span class="co">#&gt; 10     A gene52   3.743798 0.5173769      5   0.5</span></span>
+<span><span class="co">#&gt; 11     B gene13   9.938137 0.3418472      5   0.5</span></span>
+<span><span class="co">#&gt; 12     B  gene2   8.273987 0.3147537      5   0.5</span></span>
+<span><span class="co">#&gt; 13     B gene21   6.584681 0.5279636      5   0.5</span></span>
+<span><span class="co">#&gt; 14     B gene41   5.518354 0.6317005      5   0.5</span></span>
+<span><span class="co">#&gt; 15     B gene74   3.226598 0.4940783      5   0.5</span></span>
+<span><span class="co">#&gt; 16     B gene24   3.370467 0.7214700      5   0.5</span></span>
+<span><span class="co">#&gt; 17     B gene66   7.008174 0.5883218      5   0.5</span></span>
+<span><span class="co">#&gt; 18     B gene94   8.422255 0.5375914      5   0.5</span></span>
+<span><span class="co">#&gt; 19     B gene95   5.703161 0.4462475      5   0.5</span></span>
+<span><span class="co">#&gt; 20     B gene52   2.438579 0.5173769      5   0.5</span></span></code></pre></div>
+<p>For information on basic usage, see <a href="https://kaiaragaki.github.io/reclanc/articles/using-reclanc.html">this</a> vignette. For a case study, as well as how to optimize the <code>active</code> parameter, see <a href="https://kaiaragaki.github.io/reclanc/articles/case-study.html">this</a> vignette.</p>
+</div>
+<div class="section level2">
 <h2 id="how-it-works">How it works<a class="anchor" aria-label="anchor" href="#how-it-works"></a>
 </h2>
-<p>You can find a more in-depth and statistically rigorous definition of how this algorithm works <a href="https://doi.org/10.1093/bioinformatics/bti681" class="external-link">here</a>.</p>
+<p>You can find a gentle introduction to how reclanc works <a href="https://kai.rbind.io/posts/projects-reclanc/" class="external-link">here</a> and a more in-depth and statistically rigorous definition of how this algorithm works in the <a href="https://doi.org/10.1093/bioinformatics/bti681" class="external-link">original paper</a>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
