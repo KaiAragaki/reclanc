@@ -4,7 +4,14 @@
 \alias{predict.clanc}
 \title{Predict from a \code{clanc}}
 \usage{
-\method{predict}{clanc}(object, new_data, type, assay = NULL, ...)
+\method{predict}{clanc}(
+  object,
+  new_data,
+  type,
+  assay = NULL,
+  verbosity = c("all", "warn", "none"),
+  ...
+)
 }
 \arguments{
 \item{object}{A \code{clanc} object.}

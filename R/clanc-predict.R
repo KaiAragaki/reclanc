@@ -22,9 +22,14 @@
 #' to be the same as the number of rows in `new_data`.
 #'
 #' @export
-predict.clanc <- function(object, new_data, type, assay = NULL, ...) {
+predict.clanc <- function(object,
+                          new_data,
+                          type,
+                          assay = NULL,
+                          verbosity = c("all", "warn", "none"),
+                          ...) {
   new_data <- wrangle_data(new_data, assay)
-  forged <- custom_forge(new_data, object$blueprint)
+  forged <- custom_forge(new_data, object$blueprint, verbosity)
   rlang::arg_match(type, valid_clanc_predict_types())
   predict_clanc_bridge(type, object, forged$predictors, ...)
 }

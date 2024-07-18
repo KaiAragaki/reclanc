@@ -1,4 +1,4 @@
-process_priors <- function(processed, active, priors, ...) {
+process_priors <- function(processed, active, priors, verbosity, ...) {
   stopifnot(is.character(priors) || is.numeric(priors))
 
   n_levels <- length(levels(processed$outcomes[[1]]))
@@ -26,7 +26,7 @@ process_priors <- function(processed, active, priors, ...) {
   if (sum(priors) > 1) {
     cli::cli_abort("Sum of priors ({sum(priors)}) is greater than 1")
   }
-  if (sum(priors) < 1) {
+  if (sum(priors) < 1 && verbosity %in% c("all", "warn")) {
     cli::cli_warn("Sum of priors ({sum(priors)}) is less than 1")
   }
   priors
