@@ -15,60 +15,17 @@ clanc(x, ...)
 
 \method{clanc}{default}(x, ...)
 
-\method{clanc}{data.frame}(
-  x,
-  classes,
-  active,
-  priors = "equal",
-  verbosity = c("all", "warn", "none"),
-  ...
-)
+\method{clanc}{data.frame}(x, classes, active, priors = "equal", ...)
 
-\method{clanc}{matrix}(
-  x,
-  classes,
-  active,
-  priors = "equal",
-  verbosity = c("all", "warn", "none"),
-  ...
-)
+\method{clanc}{matrix}(x, classes, active, priors = "equal", ...)
 
-\method{clanc}{SummarizedExperiment}(
-  x,
-  classes,
-  active,
-  priors = "equal",
-  verbosity = c("all", "warn", "none"),
-  assay = 1,
-  ...
-)
+\method{clanc}{SummarizedExperiment}(x, classes, active, priors = "equal", assay = 1, ...)
 
-\method{clanc}{ExpressionSet}(
-  x,
-  classes,
-  active,
-  priors = "equal",
-  verbosity = c("all", "warn", "none"),
-  ...
-)
+\method{clanc}{ExpressionSet}(x, classes, active, priors = "equal", ...)
 
-\method{clanc}{formula}(
-  formula,
-  data,
-  active,
-  priors = "equal",
-  verbosity = c("all", "warn", "none"),
-  ...
-)
+\method{clanc}{formula}(formula, data, active, priors = "equal", ...)
 
-\method{clanc}{recipe}(
-  x,
-  data,
-  active,
-  priors = "equal",
-  verbosity = c("all", "warn", "none"),
-  ...
-)
+\method{clanc}{recipe}(x, data, active, priors = "equal", ...)
 }
 \arguments{
 \item{x}{Depending on the context:
@@ -124,9 +81,6 @@ set
 When \code{x} is an \strong{ExpressionSet} or \strong{SummarizedExperiment}, \code{active} can
 additionally by the name of the column in \code{pData(x)} or \code{colData(x)} that
 contains the numeric vector}
-
-\item{verbosity}{How noisy the function should be. If "warn", only warnings
-will be emitted. If "none", neither warnings nor messages will be emitted.}
 
 \item{assay}{When a \strong{SummarizedExperiment} is used, the index or name of
 the assay}

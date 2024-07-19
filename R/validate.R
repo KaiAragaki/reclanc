@@ -1,9 +1,9 @@
-process_priors <- function(processed, active, priors, verbosity) {
+process_priors <- function(processed, active, priors) {
   stopifnot(is.character(priors) || is.numeric(priors))
   classes <- processed$outcomes[[1]]
   priors <- process_priors_length(priors, length(levels(classes)))
   if (is.character(priors)) return(process_priors_char(priors, classes))
-  if (is.numeric(priors)) return(process_priors_num(priors, verbosity))
+  if (is.numeric(priors)) return(process_priors_num(priors))
 }
 
 process_priors_length <- function(priors, n_levels) {
@@ -24,11 +24,11 @@ process_priors_length <- function(priors, n_levels) {
 
 # Assumes input is correct length
 # eg a length of 1 has been recycled
-process_priors_num <- function(priors, verbosity) {
+process_priors_num <- function(priors) {
   if (any(priors < 0)) cli::cli_abort("All priors must be positive")
   # HACK Should probably use machine epsilon
   if (sum(priors) > 1.01) cli::cli_abort("Sum of priors > 1 ({sum(priors)})")
-  if (sum(priors) < 0.99 && verbosity %in% c("all", "warn"))
+  if (sum(priors) < 0.99)
     cli::cli_warn("Sum of priors < 1 ({sum(priors)})")
   priors
 }

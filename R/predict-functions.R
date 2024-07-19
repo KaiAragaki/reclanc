@@ -83,7 +83,7 @@ wrangle_data_es <- function(data) {
 
 # Often, not all of the predictors will be present
 # This is typical and worth working around rather than erroring
-custom_forge <- function(new_data, blueprint, verbosity) {
+custom_forge <- function(new_data, blueprint) {
   predictors <- colnames(blueprint$ptypes$predictors)
   contains <- intersect(predictors, colnames(new_data))
 
@@ -95,11 +95,9 @@ custom_forge <- function(new_data, blueprint, verbosity) {
   u_nd <- length(contains)
   pct_found <- round(100 * u_nd/ u_pred)
 
-  if (verbosity == "all") {
-    cli::cli_inform(
-      "{u_nd}/{u_pred} ({pct_found}%) genes in centroids found in data"
-    )
-  }
+  cli::cli_inform(
+    "{u_nd}/{u_pred} ({pct_found}%) genes in centroids found in data"
+  )
 
   new_data <- new_data[, which(colnames(new_data) %in% contains)]
   new_data <- tibble::as_tibble(new_data)

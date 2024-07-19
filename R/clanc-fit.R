@@ -60,9 +60,6 @@
 #' additionally by the name of the column in `pData(x)` or `colData(x)` that
 #' contains the numeric vector
 #'
-#' @param verbosity How noisy the function should be. If "warn", only warnings
-#'   will be emitted. If "none", neither warnings nor messages will be emitted.
-#'
 #' @param ... Not currently used, but required for extensibility.
 #'
 #' @details The original description of ClaNC can be found
@@ -150,11 +147,10 @@ clanc.data.frame <- function(x,
                              classes,
                              active,
                              priors = "equal",
-                             verbosity = c("all", "warn", "none"),
                              ...) {
   x <- t(x)
   processed <- hardhat::mold(x, classes)
-  clanc_bridge(processed, active, priors, verbosity, ...)
+  clanc_bridge(processed, active, priors, ...)
 }
 
 # XY method - matrix
@@ -165,11 +161,10 @@ clanc.matrix <- function(x,
                          classes,
                          active,
                          priors = "equal",
-                         verbosity = c("all", "warn", "none"),
                          ...) {
   x <- t(x)
   processed <- hardhat::mold(x, classes)
-  clanc_bridge(processed, active, priors, verbosity, ...)
+  clanc_bridge(processed, active, priors, ...)
 }
 
 # XY method - SummarizedExperiment
@@ -180,7 +175,6 @@ clanc.SummarizedExperiment <- function(x,
                                        classes,
                                        active,
                                        priors = "equal",
-                                       verbosity = c("all", "warn", "none"),
                                        assay = 1,
                                        ...) {
   rlang::check_installed(
@@ -223,7 +217,7 @@ clanc.SummarizedExperiment <- function(x,
   }
 
   processed <- hardhat::mold(expression, classes)
-  clanc_bridge(processed, active, priors, verbosity, ...)
+  clanc_bridge(processed, active, priors, ...)
 }
 
 # XY method - ExpressionSet
@@ -234,7 +228,6 @@ clanc.ExpressionSet <- function(x,
                                 classes,
                                 active,
                                 priors = "equal",
-                                verbosity = c("all", "warn", "none"),
                                 ...) {
   rlang::check_installed(
     "Biobase", reason = "to use `clanc.ExpressionSet()`"
@@ -274,7 +267,7 @@ clanc.ExpressionSet <- function(x,
   }
 
   processed <- hardhat::mold(expression, classes)
-  clanc_bridge(processed, active, priors, verbosity, ...)
+  clanc_bridge(processed, active, priors, ...)
 }
 
 # Formula method
@@ -285,7 +278,6 @@ clanc.formula <- function(formula,
                           data,
                           active,
                           priors = "equal",
-                          verbosity = c("all", "warn", "none"),
                           ...) {
   # Oftentimes the formula will be incredibly wide.
   # R hates this.
@@ -297,7 +289,7 @@ clanc.formula <- function(formula,
   pred <- data[, which(colnames(data) %in% args$predictors)]
   outcomes <- data[, which(colnames(data) %in% args$outcomes)]
 
-  clanc.data.frame(t(pred), outcomes, active, priors, verbosity, ...)
+  clanc.data.frame(t(pred), outcomes, active, priors, ...)
 }
 
 # Recipe method
@@ -308,23 +300,21 @@ clanc.recipe <- function(x,
                          data,
                          active,
                          priors = "equal",
-                         verbosity = c("all", "warn", "none"),
                          ...) {
   processed <- hardhat::mold(x, data)
-  clanc_bridge(processed, active, priors, verbosity, ...)
+  clanc_bridge(processed, active, priors, ...)
 }
 
 # ------------------------------------------------------------------------------
 # Bridge
 
-clanc_bridge <- function(processed, active, priors, verbosity, ...) {
+clanc_bridge <- function(processed, active, priors, ...) {
 
   # NOTE What happens if classes supplied upstream are not the proper length?
   # That is, the length of the vector is shorter than the length of the data?
   # (not necessarily n_levels deficiency)
-  verbosity <- rlang::arg_match(verbosity, c("all", "warn", "none"))
   active <- process_active(processed, active, priors, ...)
-  priors <- process_priors(processed, active, priors, verbosity, ...)
+  priors <- process_priors(processed, active, priors, ...)
   validate_classes(processed, active, priors)
 
   expression <- processed$predictors

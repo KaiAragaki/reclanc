@@ -4,14 +4,7 @@
 \alias{predict.clanc}
 \title{Predict from a \code{clanc}}
 \usage{
-\method{predict}{clanc}(
-  object,
-  new_data,
-  type,
-  assay = NULL,
-  verbosity = c("all", "warn", "none"),
-  ...
-)
+\method{predict}{clanc}(object, new_data, type, assay = NULL, ...)
 }
 \arguments{
 \item{object}{A \code{clanc} object.}
@@ -26,9 +19,6 @@ Valid options are:
 
 \item{assay}{If \code{object} inherits \code{SummarizedExperiment}, the index of the
 assay.}
-
-\item{verbosity}{How noisy the function should be. If "warn", only warnings
-will be emitted. If "none", neither warnings nor messages will be emitted.}
 
 \item{...}{Not used, but required for extensibility.}
 

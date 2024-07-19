@@ -14,9 +14,6 @@
 #' @param assay If `object` inherits `SummarizedExperiment`, the index of the
 #'   assay.
 #'
-#' @param verbosity How noisy the function should be. If "warn", only warnings
-#'   will be emitted. If "none", neither warnings nor messages will be emitted.
-#'
 #' @param ... Not used, but required for extensibility.
 #'
 #' @return
@@ -29,11 +26,9 @@ predict.clanc <- function(object,
                           new_data,
                           type,
                           assay = NULL,
-                          verbosity = c("all", "warn", "none"),
                           ...) {
-  verbosity <- rlang::arg_match(verbosity)
   new_data <- wrangle_data(new_data, assay)
-  forged <- custom_forge(new_data, object$blueprint, verbosity)
+  forged <- custom_forge(new_data, object$blueprint)
   rlang::arg_match(type, valid_clanc_predict_types())
   predict_clanc_bridge(type, object, forged$predictors, ...)
 }
