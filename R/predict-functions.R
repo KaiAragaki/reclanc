@@ -93,7 +93,7 @@ custom_forge <- function(new_data, blueprint) {
 
   u_pred <- length(unique(predictors))
   u_nd <- length(contains)
-  pct_found <- round(100 * u_nd/ u_pred)
+  pct_found <- round(100 * u_nd / u_pred)
 
   cli::cli_inform(
     "{u_nd}/{u_pred} ({pct_found}%) genes in centroids found in data"
