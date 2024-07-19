@@ -1,35 +1,45 @@
-process_priors <- function(processed, active, priors, verbosity, ...) {
+process_priors <- function(processed, active, priors, verbosity) {
   stopifnot(is.character(priors) || is.numeric(priors))
+  classes <- processed$outcomes[[1]]
+  priors <- process_priors_length(priors, length(levels(classes)))
+  if (is.character(priors)) return(process_priors_char(priors, classes))
+  if (is.numeric(priors)) return(process_priors_num(priors, verbosity))
+}
 
-  n_levels <- length(levels(processed$outcomes[[1]]))
-
+process_priors_length <- function(priors, n_levels) {
   if (is.character(priors)) {
-    stopifnot(length(priors) == 1, priors %in% c("class", "equal"))
-    if (priors == "class") {
-      freqs <- as.numeric(table(processed$outcomes))
-      priors <- freqs / nrow(processed$outcomes)
+    if (length(priors) != 1) {
+      cli::cli_abort("Length of priors must be 1 if priors is a character")
     }
-    if (priors == "equal") priors <- 1 / n_levels
   }
-
   if (length(priors) == 1) priors <- rep(priors, times = n_levels)
-  if (length(priors) != n_levels) {
+  if (length(priors) == n_levels) {
     cli::cli_abort(c(
       "Length of priors must be equal to 1 or number of unique class labels",
       "i" = "Length of priors: {length(priors)}",
       "i" = "Number of unique class labels: {n_levels}"
     ))
   }
-  if (any(priors < 0)) {
-    cli::cli_abort("All priors must be positive")
-  }
-  if (sum(priors) > 1.01) {
-    cli::cli_abort("Sum of priors ({sum(priors)}) is greater than 1")
-  }
-  if (sum(priors) < 0.99 && verbosity %in% c("all", "warn")) {
-    cli::cli_warn("Sum of priors ({sum(priors)}) is less than 1")
-  }
+}
+
+# Assumes input is correct length
+# eg a length of 1 has been recycled
+process_priors_num <- function(priors, verbosity) {
+  if (any(priors < 0)) cli::cli_abort("All priors must be positive")
+  # HACK Should probably use machine epsilon
+  if (sum(priors) > 1.01) cli::cli_abort("Sum of priors > 1 ({sum(priors)})")
+  if (sum(priors) < 0.99 && verbosity %in% c("all", "warn"))
+    cli::cli_warn("Sum of priors < 1 ({sum(priors)})")
   priors
+}
+
+# Assumes priors input is length 1
+process_priors_char <- function(priors, classes) {
+  if (priors == "class") {
+    freqs <- as.numeric(table(classes))
+    return(freqs / nrow(classes))
+  }
+  if (priors == "equal") return(1 / length(levels(classes)))
 }
 
 process_active <- function(processed, active, priors, ...) {
