@@ -1,4 +1,4 @@
-process_priors <- function(processed, active, priors) {
+process_priors <- function(processed, priors) {
   stopifnot(is.character(priors) || is.numeric(priors))
   classes <- processed$outcomes[[1]]
   if (is.character(priors)) return(process_priors_char(priors, classes))

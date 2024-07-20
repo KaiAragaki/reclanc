@@ -314,7 +314,7 @@ clanc_bridge <- function(processed, active, priors, ...) {
   # That is, the length of the vector is shorter than the length of the data?
   # (not necessarily n_levels deficiency)
   active <- process_active(processed, active, priors, ...)
-  priors <- process_priors(processed, active, priors, ...)
+  priors <- process_priors(processed, priors)
   validate_classes(processed, active, priors)
 
   expression <- processed$predictors
