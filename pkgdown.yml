@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   case-study: case-study.html
   using-reclanc: using-reclanc.html
-last_built: 2024-07-20T03:16Z
+last_built: 2024-07-20T04:57Z
 urls:
   reference: https://kaiaragaki.github.io/reclanc/reference
   article: https://kaiaragaki.github.io/reclanc/articles
