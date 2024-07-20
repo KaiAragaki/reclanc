@@ -37,7 +37,7 @@ process_priors_num <- function(priors) {
 process_priors_char <- function(priors, classes) {
   if (priors == "class") {
     freqs <- as.numeric(table(classes))
-    return(freqs / nrow(classes))
+    return(freqs / length(classes))
   }
   if (priors == "equal") return(1 / length(levels(classes)))
 }
