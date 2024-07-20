@@ -37,4 +37,5 @@ test_that("num priors processed correctly", {
   expect_error(process_priors_num(c(0.5, 0.6), factor(c("a", "b"))))
   expect_error(process_priors_num(1, factor(c("a", "b"))))
   expect_no_error(process_priors_num(1.000001, factor("a")))
+  expect_error(process_priors_num(1, factor(c("a", "b"))))
 })
