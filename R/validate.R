@@ -39,7 +39,10 @@ process_priors_char <- function(priors, classes) {
     freqs <- as.numeric(table(classes))
     return(freqs / length(classes))
   }
-  if (priors == "equal") return(1 / length(levels(classes)))
+  if (priors == "equal") {
+    n_class <- length(levels(classes))
+    return(rep(1 / n_class, n_class))
+  }
 }
 
 process_active <- function(processed, active, priors, ...) {
