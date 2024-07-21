@@ -185,7 +185,8 @@ clanc.SummarizedExperiment <- function(x,
   cd_names <- colnames(SummarizedExperiment::colData(x))
 
   if (!spec_in_cd(classes, cd_names) &&
-        (spec_in_cd(priors, cd_names) || spec_in_cd(active, cd_names))) {
+        ((!priors %in% c("equal", "class") && (spec_in_cd(priors, cd_names))) ||
+         spec_in_cd(active, cd_names))) {
     cli::cli_abort(
       "`classes` must be specified as a column name in colData if `active` or `priors` are." #nolint
     )
