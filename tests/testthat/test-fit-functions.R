@@ -18,7 +18,6 @@ test_that("class statistics calculation works", {
   n_gene <- 3
   n_rep <- 3
   classes <- factor(rep(letters[seq_len(n_class)], each = n_rep))
-  # 4 classes (row), 3 genes (col), 3 replicates of each sample
   class_means <- matrix(1:4, nrow = n_class, ncol = n_gene)
   # This works ONLY because all classes are of the same size
   # Otherwise the mean of the means != overall mean
