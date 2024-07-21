@@ -54,7 +54,7 @@ calculate_pooled_sd <- function(expression, class_data, classes, class_means) {
   out
 }
 
-#' @importFrom collapse %c*% %r-% %r/%
+#' @importFrom collapse %c/% %r-% %r/%
 calculate_class_stats <- function(classes,
                                   class_means,
                                   overall_means,
@@ -63,7 +63,7 @@ calculate_class_stats <- function(classes,
   class_means <- as.matrix(class_means)
   fsweep1 <- class_means %r-% overall_means
   fsweep2 <- fsweep1 %r/% class_pooled_sds
-  fsweep3 <- fsweep2 %c*% as.data.frame(mks)$Freq
+  fsweep3 <- fsweep2 %c/% as.data.frame(mks)$Freq
   fsweep3
 }
 
@@ -89,6 +89,8 @@ select_genes <- function(abs_stats, ranks, ties, class_data) {
     gene = df$gene
   )
 }
+
+
 
 #' @importFrom rlang .data
 selection_recurse <- function(df) {
