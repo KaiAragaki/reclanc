@@ -237,7 +237,8 @@ clanc.ExpressionSet <- function(x,
   pd_names <- colnames(Biobase::pData(x))
 
   if (!spec_in_cd(classes, pd_names) &&
-        (spec_in_cd(priors, pd_names) || spec_in_cd(active, pd_names))) {
+        ((!priors %in% c("equal", "class") && (spec_in_cd(priors, pd_names))) ||
+         spec_in_cd(active, pd_names))) {
     cli::cli_abort(
       "`classes` must be specified as a column name in pData if `active` or `priors` are." #nolint
     )
@@ -253,11 +254,11 @@ clanc.ExpressionSet <- function(x,
 
   if (spec_in_cd(classes, pd_names) &&
         nrow(unique(metadata)) > length(unique(metadata$class))) {
-    cli::cli_abort(
+    cli::cli_abort(c(
       "More than one prior and/or active for each class",
       "i" = "Each class must have exactly 1 prior and active",
       "i" = "To test across many `active`, use `tune::tune_grid`"
-    )
+    ))
   } else {
     metadata <- unique(metadata)
     classes <- x[[classes]]
