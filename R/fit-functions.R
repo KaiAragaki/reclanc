@@ -35,23 +35,17 @@ clanc_fit <- function(expression, class_data, classes) {
   list(centroids = out)
 }
 
-#' @importFrom collapse %c*%
-calculate_pooled_sd <- function(expression, class_data, classes, class_means) {
-  class_means <- as.matrix(class_means)
+calculate_pooled_sd <- function(expression, class_data, classes) {
   df <- nrow(expression) - nrow(class_data)
-
-  mat <- matrix(0, nrow = 1, ncol = ncol(expression))
-  for (i in seq_along(levels(classes))) {
-    class_exp <- expression[which(classes == levels(classes)[i]), ]
-    fswept <- collapse::TRA(class_exp, class_means[i, , drop = FALSE])
-    fsquared <- fswept %c*% fswept
-    fsummed <- collapse::fsum(fsquared)
-    mat <- mat + fsummed
-  }
-
-  out <- sqrt(colSums(mat / df))
+  sum_sq_diffs <- tapply(data.frame(expression), classes, sum_sq_diff)
+  sum_sq_diffs <- do.call(rbind, sum_sq_diffs)
+  out <- sqrt(colSums(sum_sq_diffs / df))
   names(out) <- colnames(expression)
   out
+}
+
+sum_sq_diff <- function(exp) {
+  colSums(scale(exp, center = TRUE, scale = FALSE)^2)
 }
 
 #' @importFrom collapse %c/% %r-% %r/%
