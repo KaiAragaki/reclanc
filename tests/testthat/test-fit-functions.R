@@ -12,3 +12,22 @@ test_that("making ptypes works", {
   expect_true(all(sapply(new_ptypes$predictors, class) ==  "numeric"))
   expect_true(all(sapply(new_ptypes, nrow) == 0))
 })
+
+test_that("class statistics calculation works", {
+  n_class <- 4
+  n_gene <- 3
+  n_rep <- 3
+  classes <- factor(rep(letters[seq_len(n_class)], each = n_rep))
+  # 4 classes (row), 3 genes (col), 3 replicates of each sample
+  class_means <- matrix(1:4, nrow = n_class, ncol = n_gene)
+  # This works ONLY because all classes are of the same size
+  # Otherwise the mean of the means != overall mean
+  overall_means <- colSums(class_means) / n_class
+  psd <- matrix(1, nrow = 1, ncol = n_gene)
+  stats <- calculate_class_stats(classes, class_means, overall_means, psd)
+  expect_equal(
+    stats[1, 1],
+    (class_means[1, 1] - overall_means[1]) /
+      (sqrt(1 / n_rep - 1 / length(classes)) * psd[1])
+  )
+})
