@@ -135,6 +135,8 @@ create_centroids <- function(selected, class_means, overall_means) {
   out
 }
 
+# Predictors to use are only 'discovered' *after* fitting
+# Therefore the default way of dealing with predictors isn't sufficient
 make_new_ptypes <- function(fit, processed) {
   genes <- unique(fit$centroids$gene)
   # make a dummy tibble w proper dims
