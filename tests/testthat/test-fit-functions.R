@@ -13,6 +13,21 @@ test_that("making ptypes works", {
   expect_true(all(sapply(new_ptypes, nrow) == 0))
 })
 
+test_that("class pooled sd calculation works", {
+  n_class <- 4
+  n_gene <- 3
+  n_rep <- 3
+  classes <- factor(rep(letters[seq_len(n_class)], each = n_rep))
+  exp <- matrix(seq_len(n_class * n_gene * n_rep), ncol = n_gene)
+  class_data <- data.frame(class = letters[seq_len(n_class)])
+  expect_equal(
+    calculate_pooled_sd(exp, class_data, classes),
+    c(1, 1, 1)
+  )
+})
+
+
+# TODO: Make sure this function respects factor order
 test_that("class statistics calculation works", {
   n_class <- 4
   n_gene <- 3
