@@ -61,10 +61,10 @@ calculate_class_stats <- function(classes,
                                   class_pooled_sds) {
   mks <- sqrt(1 / table(classes) - 1 / length(classes))
   class_means <- as.matrix(class_means)
-  fsweep1 <- class_means %r-% overall_means
-  fsweep2 <- fsweep1 %r/% class_pooled_sds
-  fsweep3 <- fsweep2 %c/% as.data.frame(mks)$Freq
-  fsweep3
+  class_means %r-%
+    overall_means %r/%
+    class_pooled_sds %c/%
+    as.data.frame(mks)$Freq
 }
 
 select_genes <- function(abs_stats, ranks, ties, class_data) {
