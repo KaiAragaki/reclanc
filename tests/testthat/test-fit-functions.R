@@ -27,6 +27,32 @@ test_that("class pooled sd calculation works", {
 })
 
 
+# TODO:
+# Case of tie
+# Case of tie and one active is full
+# Case of more active than exist? Or is that handled upstream?
+test_that("gene selection works", {
+
+  abs_stats <- matrix(
+    c(1, 2, 3,
+      2, 3, 1,
+      3, 1, 2),
+    nrow = 3, byrow = TRUE,
+    dimnames = list(letters[4:6], letters[1:3])
+  )
+
+  class_data <- data.frame(
+    class = factor(letters[4:6]),
+    active = rep(1, 3)
+  )
+
+  ranks <- t(apply(abs_stats, 1, \(x) rank(-x, ties.method = "min")))
+  ties <- t(apply(ranks, 1, duplicated))
+  selected <- select_genes(abs_stats, ranks, ties, class_data)
+  expect_equal(selected, data.frame(class = factor(letters[4:6]), gene = letters[3:1]))
+})
+
+
 # TODO: Make sure this function respects factor order
 test_that("class statistics calculation works", {
   n_class <- 4
