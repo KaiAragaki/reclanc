@@ -2,12 +2,7 @@ clanc_fit <- function(expression, class_data, classes) {
   class_means <- collapse::fmean(expression, classes, na.rm = TRUE)
   overall_means <- colMeans(expression, na.rm = TRUE)
 
-  pooled_sds <- calculate_pooled_sd(
-    expression,
-    class_data,
-    classes,
-    class_means
-  )
+  pooled_sds <- calculate_pooled_sd(expression, class_data, classes)
 
   class_stats <- calculate_class_stats(
     classes, class_means, overall_means, pooled_sds
