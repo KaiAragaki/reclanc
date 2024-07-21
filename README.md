@@ -5,6 +5,7 @@
 
 <!-- badges: start -->
 
+[![codecov](https://codecov.io/gh/KaiAragaki/reclanc/graph/badge.svg?token=Z1AquW3Awo)](https://codecov.io/gh/KaiAragaki/reclanc)
 <!-- badges: end -->
 
 reclanc is a revival of [ClaNC (Classification of microarrays to nearest
