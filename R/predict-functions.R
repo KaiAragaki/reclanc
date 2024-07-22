@@ -69,11 +69,11 @@ wrangle_data_se <- function(data, assay) {
 }
 
 wrangle_data_df <- function(data) {
-  data
+  t(data)
 }
 
 wrangle_data_matrix <- function(data) {
-  data
+  t(data)
 }
 
 wrangle_data_es <- function(data) {

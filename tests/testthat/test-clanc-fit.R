@@ -31,7 +31,7 @@ test_that("SummarizedExperiment catch bad args", {
   )
 })
 
-test_that("SummarizedExperiment catch bad args", {
+test_that("ExpressionSet catch bad args", {
   library(Biobase)
   assay <- matrix(1:4, nrow = 2)
   pdata <- AnnotatedDataFrame(
@@ -57,5 +57,50 @@ test_that("SummarizedExperiment catch bad args", {
   expect_error(
     clanc(es, classes = "a", active = "active", priors = "prior"),
     "More than one prior"
+  )
+})
+
+test_that("fit works", {
+  data <- synthetic_expression
+
+  fit_mat <- clanc(data$expression, data$classes, active = 2)
+
+  fit_df <- clanc(as.data.frame(data$expression), data$classes, active = 2)
+
+  se <- SummarizedExperiment::SummarizedExperiment(
+    data$expression,
+    colData = S4Vectors::DataFrame(class = data$classes)
+  )
+
+  fit_se <- clanc(se, classes = "class", active = 2, assay = 1)
+
+  pdata <- Biobase::AnnotatedDataFrame(
+    data.frame(class = data$class,row.names = colnames(data$expression))
+  )
+
+  es <- Biobase::ExpressionSet(data$expression, pdata)
+
+  fit_es <- clanc(es, classes = "class", active = 2)
+
+  form <- cbind(class = data$classes, as.data.frame(t(data$expression)))
+
+  form_fit <- clanc(class ~ ., form, active = 2)
+
+  recipe_fit <- parsnip::discrim_linear() |>
+    parsnip::set_engine("clanc", active = 2) |>
+    parsnip::fit(class ~ ., data = form)
+
+  expect_true(
+    all(fit_mat$centroids$gene %in% c("gene13", "gene41", "gene52", "gene74"))
+  )
+
+  expect_true(
+    all(
+      sapply(
+        list(fit_df, fit_se, fit_es, form_fit, recipe_fit$fit),
+        identical,
+        fit_mat
+      )
+    )
   )
 })
