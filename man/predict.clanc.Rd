@@ -20,12 +20,12 @@ Valid options are:
 \item{assay}{If \code{object} inherits \code{SummarizedExperiment}, the index of the
 assay.}
 
+\item{format}{Character. Are the data "wide" (default), with genes as
+columns, or "tall", with genes as rows?}
+
 \item{...}{Not used, but required for extensibility.}
 
 \item{method}{If \code{type} is \code{numeric}, the method of correlation}
-
-\item{format.}{Character. Are the data "wide" (default), with genes as
-columns, or "tall", with genes as rows?}
 }
 \value{
 A tibble of predictions. The number of rows in the tibble is guaranteed

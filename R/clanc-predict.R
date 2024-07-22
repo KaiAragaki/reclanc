@@ -13,7 +13,7 @@
 #'
 #' @param assay If `object` inherits `SummarizedExperiment`, the index of the
 #'   assay.
-#' @param format. Character. Are the data "wide" (default), with genes as
+#' @param format Character. Are the data "wide" (default), with genes as
 #'   columns, or "tall", with genes as rows?
 #' @param ... Not used, but required for extensibility.
 #'
