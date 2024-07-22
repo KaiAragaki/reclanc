@@ -4,7 +4,7 @@
 \alias{predict.clanc}
 \title{Predict from a \code{clanc}}
 \usage{
-\method{predict}{clanc}(object, new_data, type, assay = NULL, ...)
+\method{predict}{clanc}(object, new_data, type, assay = NULL, format = c("wide", "tall"), ...)
 }
 \arguments{
 \item{object}{A \code{clanc} object.}
@@ -23,6 +23,9 @@ assay.}
 \item{...}{Not used, but required for extensibility.}
 
 \item{method}{If \code{type} is \code{numeric}, the method of correlation}
+
+\item{format.}{Character. Are the data "wide" (default), with genes as
+columns, or "tall", with genes as rows?}
 }
 \value{
 A tibble of predictions. The number of rows in the tibble is guaranteed

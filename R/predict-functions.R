@@ -2,7 +2,7 @@ filter_predictors <- function(fit, predictors) {
   # make sure rownames exist
   # Check number of genes in centroids that are in dataset. if no rows after
   # filter, provide info of what the centroid names look like (example).
-  merge(fit$centroids, predictors, by.x = "gene", by.y = "row.names")
+  merge(fit$centroids, t(predictors), by.x = "gene", by.y = "row.names")
 }
 
 calc_dist <- function(all) {
@@ -52,12 +52,12 @@ predict_dist_multi <- function(dists) {
 
 # dists: col = sample, row = class, value = dist
 
-wrangle_data <- function(data, assay) {
+wrangle_data <- function(data, assay, format) {
   if (inherits(data, "SummarizedExperiment")) {
     return(wrangle_data_se(data, assay))
   }
-  if (inherits(data, "data.frame")) return(wrangle_data_df(data))
-  if (inherits(data, "matrix")) return(wrangle_data_matrix(data))
+  if (inherits(data, "data.frame")) return(wrangle_data_df(data, format))
+  if (inherits(data, "matrix")) return(wrangle_data_matrix(data, format))
   if (inherits(data, "ExpressionSet")) return(wrangle_data_es(data))
   cli::cli_abort("Unable to predict object of type {class(data)}")
 }
@@ -68,12 +68,14 @@ wrangle_data_se <- function(data, assay) {
   t(data)
 }
 
-wrangle_data_df <- function(data) {
-  t(data)
+wrangle_data_df <- function(data, format) {
+  if (format == "tall") data <- t(data)
+  data
 }
 
-wrangle_data_matrix <- function(data) {
-  t(data)
+wrangle_data_matrix <- function(data, format) {
+  if (format == "tall") data <- t(data)
+  data
 }
 
 wrangle_data_es <- function(data) {
